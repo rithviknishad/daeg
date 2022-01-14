@@ -67,9 +67,10 @@ def generate_for_house(range_profile: ProfileRange, days: int, index: int):
     plt.plot(xlabels, load_profile)
     plt.xlabel("Time [hour]")
     plt.ylabel("Load [Watt]")
-    plt.title("Hourly Load for 4 Weeks")
+    plt.title("Hourly Load")
 
     plt.savefig(f"outputs/{file_name}.png")
+    plt.close()
 
 
 def main():
@@ -78,7 +79,7 @@ def main():
     houses = 21
 
     # No. of days of data to be generated.
-    days: Final = 28  # 4 Weeks
+    days: Final = 14  # 2 Weeks
 
     # get range profile from csv
     range_profile: Final = get_norm_range_profile("normalized_house_load_range.csv")
