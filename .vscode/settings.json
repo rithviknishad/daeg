@@ -1,0 +1,20 @@
+{
+  "sqltools.connections": [
+    {
+      "mysqlOptions": {
+        "authProtocol": "default"
+      },
+      "previewLimit": 50,
+      "server": "grid-democrazy.ddns.net",
+      "port": 3306,
+      "driver": "MySQL",
+      "name": "DAEG",
+      "database": "microgrid1",
+      "username": "prosumer1",
+      "password": "rebuildgrid"
+    }
+  ],
+  "python.linting.mypyEnabled": true,
+  "python.linting.pylintEnabled": false,
+  "python.linting.enabled": true
+}
