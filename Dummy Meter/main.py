@@ -46,7 +46,12 @@ def main():
 
             current_hour = math.floor((clock_time % PROFILE_MAX_SECONDS) / 3600)
 
-            power = random.random()
+            profile_power = load_profile[current_hour]
+
+            # Allows +/- 10% Randomized Load Variation from Actual Profile
+            delta = profile_power * 0.2 * (random.random() - 0.5)
+
+            power = profile_power + delta
 
             client.publish(f"prosumers/{EP_ADDR}/power", str(power))
 
