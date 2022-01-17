@@ -30,8 +30,10 @@ def main():
 
     with open(load_profile_path) as csvfile:
         reader = csv.reader(csvfile)
-        for row in reader[1:]:
-            load_profile[int(row[0].strip())] = float(row[1].strip())
+        next(reader, None)  # skip the headers
+        for row in reader:
+            if len(row) != 0:
+                load_profile[int(row[0].strip())] = float(row[1].strip())
 
     client = mqtt.Client()
 
