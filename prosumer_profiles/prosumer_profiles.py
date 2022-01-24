@@ -3,6 +3,7 @@ import csv
 import random
 from typing import *
 import matplotlib.pyplot as plt
+from datetime import datetime, timedelta
 
 ProfileRange = List[Tuple[float, float]]
 days_name = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
@@ -56,13 +57,20 @@ def generate_for_house(range_profile: ProfileRange, days: int, index: int):
             load_profile.append(round(load_pu * base_w_today))
 
     xlabels = range(days * 24)
+    timestamps: List[str] = []
+    timestamp_now = datetime.now()
+    delta_hour = timedelta(hours=1)
+
+    for hour in range(days * 24):
+        timestamp_now = timestamp_now + delta_hour
+        timestamps.append(timestamp_now.strftime("%Y-%m-%d %H:%M:%S"))
 
     file_name = f"prosumer{index+1}_base_w_{base_w}"
 
     with open(f"outputs/{file_name}.csv", "x") as file:
         write = csv.writer(file)
         write.writerow(["Time (Hour)", "Load (W)"])
-        write.writerows(zip(xlabels, load_profile))
+        write.writerows(zip(timestamps, load_profile))
 
     plt.plot(xlabels, load_profile)
     plt.xlabel("Time [hour]")
