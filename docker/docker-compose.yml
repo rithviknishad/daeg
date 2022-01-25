@@ -1,0 +1,70 @@
+version: '3.9'
+
+networks:
+  vaidyuti:
+
+volumes:
+  influxdb-volume:
+    external: true
+  grafana-volume:
+    external: true
+
+services:
+  # mosquitto:
+  #   image: eclipse-mosquitto
+  #   container_name: mosquitto
+  #   volumes:
+  #     - ./mosquitto:/mosquitto:rw
+  #   ports:
+  #     - 1883:1883
+  #     - 9001:9001
+  #   networks:
+  #     - vaidyuti
+
+  influxdb:
+    image: influxdb
+    container_name: influxdb-test
+    restart: always
+    ports:
+      - 8086:8086
+    networks:
+      - vaidyuti
+    volumes:
+      - influxdb-volume:/var/lib/influxdb
+    environment:
+      - INFLUXDB_DB=telegraf
+      - INFLUXDB_USER=telegraf
+      - INFLUXDB_PASSWORD=telegraf
+      - INFLUXDB_ADMIN_ENABLED=true
+      - INFLUXDB_ADMIN_USER=telegraf
+      - INFLUXDB_ADMIN_PASSWORD=telegraf
+
+  telegraf:
+    image: telegraf
+    container_name: telegraf-test
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /sys:/rootfs/sys:ro
+      - /proc:/rootfs/proc:ro
+      - /etc:/rootfs/etc:ro
+    depends_on:
+      - influxdb
+    environment:
+      HOST_PROC: /rootfs/proc
+      HOST_SYS: /rootfs/sys
+      HOST_ETC: /rootfs/etc
+      INFLUX_TOKEN: UKBnzU9aoH9DWeNdDaMvHHLSSbriYO-ndAxd5GqFgi8HAfaqnQJKJOJ60Pccz7None3EMp8hwbfrNF74aWkCQQ==
+    networks:
+      - vaidyuti
+
+  grafana:
+    image: grafana/grafana
+    ports:
+      - 3000:3000
+    networks:
+      - vaidyuti
+    volumes:
+      - grafana-volume:/var/lib/grafana
+    depends_on:
+      - influxdb
