@@ -84,7 +84,7 @@ def generate_for_house(range_profile: ProfileRange, days: int, index: int):
 def main():
 
     # No. of houses
-    houses = 21
+    houses = 10
 
     # No. of days of data to be generated.
     days: Final = 14  # 2 Weeks
@@ -93,12 +93,7 @@ def main():
     range_profile: Final = get_norm_range_profile("normalized_house_load_range.csv")
 
     for i in range(houses):
-        sys.stdout.write("\r")
-        sys.stdout.write(
-            "Generating and saving load profiles... [%-20s] %d%%" % ("=" * i, 5 * i)
-        )
-        sys.stdout.flush()
-        # print(f"Generating load profile for prosumer {i + 1} of {houses}")
+        print(f"Generating and saving load profiles... {i+1}/{houses}")
         generate_for_house(range_profile, days=days, index=i)
 
 
