@@ -69,7 +69,7 @@ def generate_for_house(range_profile: ProfileRange, days: int, index: int):
 
     with open(f"outputs/{file_name}.csv", "x") as file:
         write = csv.writer(file)
-        write.writerow(["Time (Hour)", "Load (W)"])
+        write.writerow(["Datetime", "Load"])
         write.writerows(zip(timestamps, load_profile))
 
     plt.plot(xlabels, load_profile)
