@@ -67,7 +67,7 @@ def generate_for_house(range_profile: ProfileRange, days: int, index: int):
 
     file_name = f"prosumer{index+1}_base_w_{base_w}"
 
-    with open(f"outputs/{file_name}.csv", "x") as file:
+    with open(f"outputs/{file_name}.csv", "w", newline="", encoding="utf-8") as file:
         write = csv.writer(file)
         write.writerow(["Datetime", "Load"])
         write.writerows(zip(timestamps, load_profile))
