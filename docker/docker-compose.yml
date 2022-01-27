@@ -22,4 +22,18 @@ services:
     volumes:
       # Mount for influxdb data directory and configuration
       - ./influx-v2:/var/lib/influxdb2:rw
- 
+  
+  telegraf:
+    container_name: telegraf-aggregator
+    image: telegraf
+    restart: always
+    volumes:
+      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+    environment:
+      - INFLUX_HOST=http://influxdb:8086
+      - INFLUX_ORG=Vaidyuti
+      - INFLUX_TOKEN=fNrGfCAk6gSLjerPosqf_p8_mqanWnxOB77TD2tYFyw2evPvF-GcDHGHQKtTzOnPiBZf1ders_voukxoPendKQ==
+      - INFLUX_BUCKET=bucket2
+    depends_on:
+      - vernemq
+      - influxdb
