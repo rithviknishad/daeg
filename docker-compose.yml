@@ -27,7 +27,7 @@ services:
       - 8086:8086
     volumes:
       # Mount for influxdb data directory and configuration
-      - ./influx-v2:/var/lib/influxdb2:rw
+      - ./docker/influx-v2:/var/lib/influxdb2:rw
     networks:
       - vaidyuti_internal_if
   
@@ -36,7 +36,7 @@ services:
     image: telegraf
     restart: always
     volumes:
-      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
+      - ./docker/telegraf.conf:/etc/telegraf/telegraf.conf:ro
     environment:
       - INFLUX_HOST=http://influxdb:8086
       - INFLUX_ORG=Vaidyuti
@@ -55,7 +55,7 @@ services:
     ports:
       - 3000:3000
     volumes:
-      - ./grafana:/var/lib/grafana
+      - ./docker/grafana:/var/lib/grafana
     depends_on:
       - influxdb
     networks:
