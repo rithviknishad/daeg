@@ -1,5 +1,8 @@
 version: '3.9'
 
+networks:
+  vaidyuti_public_if: {}
+  vaidyuti_internal_if: {}
 
 services:
   # VerneMQ MQTT Server
@@ -12,6 +15,9 @@ services:
     environment:
       - DOCKER_VERNEMQ_ALLOW_ANONYMOUS=on # Disabled for testing
       - DOCKER_VERNEMQ_ACCEPT_EULA=yes
+    networks:
+      - vaidyuti_internal_if
+      - vaidyuti_public_if
 
   influxdb:
     container_name: influxdb
@@ -22,6 +28,8 @@ services:
     volumes:
       # Mount for influxdb data directory and configuration
       - ./influx-v2:/var/lib/influxdb2:rw
+    networks:
+      - vaidyuti_internal_if
   
   telegraf:
     container_name: telegraf-aggregator
@@ -37,6 +45,9 @@ services:
     depends_on:
       - vernemq-mqtt-broker
       - influxdb
+    networks:
+      - vaidyuti_internal_if
+      - vaidyuti_public_if
 
   grafana:
     image: grafana/grafana
@@ -47,3 +58,6 @@ services:
       - ./grafana:/var/lib/grafana
     depends_on:
       - influxdb
+    networks:
+      - vaidyuti_internal_if
+      - vaidyuti_public_if
