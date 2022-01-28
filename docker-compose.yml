@@ -40,8 +40,8 @@ services:
     environment:
       - INFLUX_HOST=http://influxdb:8086
       - INFLUX_ORG=Vaidyuti
-      - INFLUX_TOKEN=fNrGfCAk6gSLjerPosqf_p8_mqanWnxOB77TD2tYFyw2evPvF-GcDHGHQKtTzOnPiBZf1ders_voukxoPendKQ==
-      - INFLUX_BUCKET=bucket2
+      - INFLUX_TOKEN=7QE8qsJhrOmC8S4QSIb1oC2hd8P9v0okhYh6dYvd-UFs0dAYltHDB4VJir5B01WZnKdQJa7TPL1yVt97M6SQ-A==
+      - INFLUX_BUCKET=central
     depends_on:
       - vernemq-mqtt-broker
       - influxdb
