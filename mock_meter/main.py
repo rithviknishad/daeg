@@ -1,14 +1,14 @@
 import math
 import random
 import sys
-import csv
+import pandas
 from time import sleep
 from typing import *
 import paho.mqtt.client as mqtt
 
-SERVER = "vaidyuti.ddns.net"
+SERVER = "localhost"
 EP_ADDR = "dummy-meter"
-speed = 1
+speed = 360
 PROFILE_MAX_SECONDS = 1206000
 
 
@@ -24,16 +24,9 @@ def on_message(client, userdata, msg):
 
 def main():
 
-    load_profile_path = sys.argv[1]
-    clock_time = 0
-    load_profile: Dict[int, float] = {}
+    load = pandas.read_csv(sys.argv[1] if len(sys.argv) > 1 else "profile.csv")["Load"]
 
-    with open(load_profile_path) as csvfile:
-        reader = csv.reader(csvfile)
-        next(reader, None)  # skip the headers
-        for row in reader:
-            if len(row) != 0:
-                load_profile[int(row[0].strip())] = float(row[1].strip())
+    clock_time = 0
 
     client = mqtt.Client()
 
@@ -48,7 +41,7 @@ def main():
 
             current_hour = math.floor((clock_time % PROFILE_MAX_SECONDS) / 3600)
 
-            profile_power = load_profile[current_hour]
+            profile_power = load[current_hour]
 
             # Allows +/- 10% Randomized Load Variation from Actual Profile
             delta = profile_power * 0.2 * (random.random() - 0.5)
