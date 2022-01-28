@@ -35,5 +35,15 @@ services:
       - INFLUX_TOKEN=fNrGfCAk6gSLjerPosqf_p8_mqanWnxOB77TD2tYFyw2evPvF-GcDHGHQKtTzOnPiBZf1ders_voukxoPendKQ==
       - INFLUX_BUCKET=bucket2
     depends_on:
-      - vernemq
+      - vernemq-mqtt-broker
+      - influxdb
+
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana:/var/lib/grafana
+    depends_on:
       - influxdb
