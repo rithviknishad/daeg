@@ -7,7 +7,6 @@ networks:
 services:
   # VerneMQ MQTT Server
   vernemq:
-    container_name: vernemq-mqtt-broker
     image: vernemq/vernemq
     restart: always
     ports:
@@ -20,7 +19,6 @@ services:
       - vaidyuti_public_if
 
   influxdb:
-    container_name: influxdb
     image: influxdb:2.1.1
     restart: always
     ports:
@@ -32,7 +30,6 @@ services:
       - vaidyuti_internal_if
   
   telegraf:
-    container_name: telegraf-aggregator
     image: telegraf
     restart: always
     volumes:
@@ -51,7 +48,6 @@ services:
 
   grafana:
     image: grafana/grafana
-    container_name: grafana
     ports:
       - 3000:3000
     volumes:
