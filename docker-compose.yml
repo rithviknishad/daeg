@@ -31,7 +31,7 @@ services:
       - ./data/influx-v2:/var/lib/influxdb2:rw
     networks:
       - internal
-  
+
   telegraf:
     image: telegraf
     restart: always
@@ -55,6 +55,11 @@ services:
       - 3000:3000
     volumes:
       - ./data/grafana:/var/lib/grafana
+    environment:
+      GF_SERVER_PROTOCOL: "http"
+      GF_SERVER_DOMAIN: "vaidyuti.ddns.net"
+      GF_SERVER_METRICS_ENABLED: "true"
+      GF_SERVER_METRICS_INTERVAL_SECONDS: "10"
     depends_on:
       - influxdb
     networks:
