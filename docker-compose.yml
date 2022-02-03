@@ -51,7 +51,7 @@ services:
       - INFLUX_TOKEN=7QE8qsJhrOmC8S4QSIb1oC2hd8P9v0okhYh6dYvd-UFs0dAYltHDB4VJir5B01WZnKdQJa7TPL1yVt97M6SQ-A==
       - INFLUX_BUCKET=central
     depends_on:
-      - vernemq-mqtt-broker
+      - vernemq
       - influxdb
     networks:
       - internal
