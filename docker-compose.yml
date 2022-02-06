@@ -8,14 +8,6 @@ networks:
     name: vaidyuti-internal
 
 services:
-
-  middleware:
-    build: ./daeg_middleware
-    ports:
-      - 8080:8080
-    expose:
-      - 8080
-
   # VerneMQ MQTT Server
   vernemq:
     image: vernemq/vernemq
