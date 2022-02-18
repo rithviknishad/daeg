@@ -65,3 +65,15 @@ services:
     networks:
       - internal
       - public
+
+  mgems-api-server:
+    build: ./mgems_api_server
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./mgems_api_server:/code
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_NAME=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
