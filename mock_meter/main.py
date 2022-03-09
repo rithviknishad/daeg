@@ -2,19 +2,20 @@ import math
 import random
 import sys
 import pandas
+import os
 from time import sleep
 from typing import *
 import paho.mqtt.client as mqtt
 
 SERVER = "localhost"
 EP_ADDR = "dummy-meter"
-speed = 360
+speed = 1
 PROFILE_MAX_SECONDS = 1206000
 
 
 def on_connect(client, userdata, flags, rc):
     print("Connected with result code " + str(rc))
-    client.subscribe(f"prosumers/{EP_ADDR}/speed")
+    client.subscribe(f"south-grid/{EP_ADDR}/speed")
 
 
 def on_message(client, userdata, msg):
@@ -25,7 +26,8 @@ def on_message(client, userdata, msg):
 def main():
 
     load = pandas.read_csv(sys.argv[1] if len(sys.argv) > 1 else "profile.csv")["Load"]
-
+    EP_ADDR = os.environ.setdefault("EP_ADDR", "no-name")
+    print("deployed with EP_ADDR: ", EP_ADDR)
     clock_time = 0
 
     client = mqtt.Client()
@@ -48,7 +50,7 @@ def main():
 
             power = profile_power + delta
 
-            client.publish(f"prosumers/{EP_ADDR}/power", str(power))
+            client.publish(f"south-grid/{EP_ADDR}/power", str(power))
 
         sleep(1 / speed)
 
