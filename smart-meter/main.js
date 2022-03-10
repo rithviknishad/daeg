@@ -10,17 +10,25 @@ const options = {
 
 const req = https.request(options, res => {
   console.log(`statusCode: ${res.statusCode}`)
-
-  res.on('data', data => {
-      console.log(String.fromCharCode(...data))
+  
+  var bodyChunks = [];
+  res.on('data', function(chunk) {
+    // You can process streamed parts here...
+    bodyChunks.push(chunk);
+  }).on('end', function() {
+    var body = Buffer.concat(bodyChunks);
+   
+    let data = JSON.parse(body)
+    console.log(data)
+    // ...and/or process the entire body here.
+  })
+});
+  
       // convert json string to js object
       // iterate through each data of estimated_actuals and print it
-      let obj =  {}
+      
 
-      obj["timestamp"]
-
-  })
-})
+ 
 
 req.on('error', console.error)
 
