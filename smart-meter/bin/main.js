@@ -1,13 +1,20 @@
-const yargs = require("yargs");
+require("dotenv").config();
 
-const options = yargs.usage("Usage: prosumer").option("a", {
-    alias: "prosumer-id",
-    default: "2001:0db8:85a3:0000:0000:8a2e:0370:7334",
-    describe: "Prosumer EP Address",
-    type: "string",
-    demandOption: false,
-}).argv;
+const mqtt = require("mqtt");
 
-const greeting = `Hello, ${options.name}!`;
+const VP_ADDRESS = process.env.VP_ADDRESS;
+const MGEMS_MQTT_URL = process.env.MGEMS_MQTT_URL;
+const MQTT_CLIENT_ID = `prosumer-${VP_ADDRESS}`;
+const MQTT_USERNAME = `${VP_ADDRESS}`;
+const MQTT_PASSWORD = `${VP_ADDRESS}`;
 
-console.log(greeting);
+let client = mqtt.connect(process.env.MGEMS_MQTT_URL, {
+    clientId: MQTT_CLIENT_ID,
+    username: MQTT_USERNAME,
+    password: MQTT_PASSWORD,
+    clean: false, // Volunatarily set to false to allow receiving QoS 1 and 2 messages when offline.
+});
+
+client.on("connect", () => {
+    console.log("Connected");
+});
