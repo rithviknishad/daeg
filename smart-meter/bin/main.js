@@ -85,13 +85,13 @@ client
     success(`Connected to ${MGEMS_MQTT_URL}`);
   })
   .on("disconnect", () => {
-    error("MQTT Disconnected");
+    error("MQTT client disconnected.");
   })
   .on("close", () => {
-    error("MQTT connection closed");
+    error("MQTT connection closed.");
   })
   .on("end", () => {
-    error("MQTT connection ended");
+    error("MQTT connection ended.");
   });
 
 function gracefullyExit() {
