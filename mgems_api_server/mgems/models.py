@@ -20,7 +20,7 @@ class _ModelMixin(models.Model):
 
 class Microgrid(_ModelMixin, models.Model):
     prosumer = models.ForeignKey("Prosumer", on_delete=models.PROTECT)
-    parent_grid = models.ForeignKey("Microgrid", on_delete=models.PROTECT)
+    parent_grid = models.ForeignKey("Microgrid", on_delete=models.PROTECT, null=True)
 
 
 class Prosumer(_ModelMixin, models.Model):
