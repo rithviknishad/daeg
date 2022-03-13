@@ -89,6 +89,7 @@ services:
       - POSTGRES_NAME=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - DJANGO_SETTINGS_MODULE=mgems_api_server.settings.dev
     depends_on:
       - vernemq
       - influxdb
