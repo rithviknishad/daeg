@@ -4,17 +4,9 @@
     "es2021": true,
     "node": true
   },
-  "extends": [
-    "google"
-  ],
-  "parserOptions": {
-    "ecmaVersion": "latest"
-  },
+  "extends": ["prettier"],
+  "plugins": ["prettier"],
   "rules": {
-    "space-before-function-paren": 0,
-    "require-jsdoc": 0
-  },
-  "plugins": [
-    "only-warn"
-  ]
+    "prettier/prettier": ["error"]
+  }
 }
