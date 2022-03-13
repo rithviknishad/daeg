@@ -18,14 +18,8 @@ class _ModelMixin(models.Model):
         self.save()
 
 
-class Microgrid(_ModelMixin, models.Model):
-    prosumer = models.ForeignKey("Prosumer", on_delete=models.PROTECT)
-    parent_grid = models.ForeignKey("Microgrid", on_delete=models.PROTECT, null=True)
-
-
 class Prosumer(_ModelMixin, models.Model):
     id = models.TextField(max_length=39, unique=True, primary_key=True)
-    grid = models.ForeignKey(Microgrid, on_delete=models.PROTECT)
     max_import_power = models.FloatField()
     max_export_power = models.FloatField()
     is_online = models.BooleanField()
