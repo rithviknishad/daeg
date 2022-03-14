@@ -78,19 +78,19 @@ services:
       - internal
       - public
 
-  mgems-api-server:
-    build: ./mgems_api_server
-    command: python manage.py runserver 0.0.0.0:8000
-    volumes:
-      - ./mgems_api_server:/code
-    ports:
-      - "8000:8000"
-    environment:
-      - POSTGRES_NAME=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-      - DJANGO_SETTINGS_MODULE=mgems_api_server.settings.dev
-    depends_on:
-      - vernemq
-      - influxdb
-      - postgres
+  # mgems-api-server:
+  #   build: ./mgems_api_server
+  #   command: python manage.py runserver 0.0.0.0:8000
+  #   # volumes:
+  #   #   - ./mgems_api_server:/code
+  #   ports:
+  #     - "8000:8000"
+  #   environment:
+  #     - POSTGRES_NAME=${POSTGRES_DB}
+  #     - POSTGRES_USER=${POSTGRES_USER}
+  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+  #     - DJANGO_SETTINGS_MODULE=mgems_api_server.settings.dev
+  #   depends_on:
+  #     - vernemq
+  #     - influxdb
+  #     - postgres
