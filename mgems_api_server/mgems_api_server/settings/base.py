@@ -16,8 +16,7 @@ import environ
 env = environ.Env()
 
 # Build paths inside the project like this: ROOT_DIR / 'subdir'.
-ROOT_DIR = Path(__file__).resolve().parent.parent
-
+ROOT_DIR = Path(__file__).resolve().parent.parent.parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -38,6 +37,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "rest_framework",
+    "django_filters",
     "mgems",
 ]
 
