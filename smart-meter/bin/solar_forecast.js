@@ -11,6 +11,8 @@ const options = {
   method: "GET",
 };
 
+let pv_estimates = [];
+
 const req = https.request(options, (res) => {
   console.log(`statusCode: ${res.statusCode}`);
 
@@ -25,7 +27,7 @@ const req = https.request(options, (res) => {
 
       let data = JSON.parse(body);
       data.estimated_actuals.forEach((row) => {
-        console.log(row.period_end + "-" + row.pv_estimate);
+        // console.log(row.period_end + "-" + row.pv_estimate);
       });
     });
 });

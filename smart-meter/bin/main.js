@@ -106,7 +106,8 @@ process.on("SIGINT", gracefullyExit);
 process.on("SIGTERM", gracefullyExit);
 
 function solar_operations(client, address, index) {
-  client.publish(`prosumers/${VP_ADDRESS}/generation/0`);
+  let solar_forecast = pv_estimates[index];
+  client.publish(`prosumers/${VP_ADDRESS}/generation/0`, solar_forecast);
 }
 
 function every15Mins() {
