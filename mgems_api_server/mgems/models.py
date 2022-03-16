@@ -1,3 +1,4 @@
+from typing import List
 from django.db import models
 from math import radians, cos, sin, asin, sqrt
 
@@ -29,20 +30,24 @@ class Prosumer(_ModelMixin, models.Model):
     # TODO: add nearest node field
 
     @property
-    def vp_address(self):
+    def vp_address(self) -> str:
         return self.id
 
     @property
     def registered_on(self):
         return self.created_at
 
+    @property
+    def energy_consumption_systems(self) -> List["ProsumerEnergyConsumptionSystem"]:
+        ProsumerEnergyConsumptionSystem.objects.get(prosumer=self)
 
-class __ProsumerSubComponentMixin(_ModelMixin, models.Model):
-    prosumer = models.ForeignKey(Prosumer, on_delete=models.PROTECT)
-    is_online = models.BooleanField()
+    @property
+    def energy_generation_systems(self) -> List["ProsumerEnergyGenerationSystem"]:
+        ProsumerEnergyGenerationSystem.objects.get(prosumer=self)
 
-    class Meta:
-        abstract = True
+    @property
+    def energy_storage_systems(self) -> List["ProsumerEnergyStorageSystem"]:
+        ProsumerEnergyStorageSystem.objects.get(prosumer=self)
 
 
 class DemandResponseAdaptiveEntityMixin(models.Model):
@@ -52,18 +57,27 @@ class DemandResponseAdaptiveEntityMixin(models.Model):
         abstract = True
 
 
-class ProsumerEnergyGenerationSystem(__ProsumerSubComponentMixin, models.Model):
+class ProsumerEnergyGenerationSystem(models.Model):
+    prosumer = models.ForeignKey(Prosumer, on_delete=models.PROTECT, related_name="generations")
+    is_online = models.BooleanField()
+
     max_power = models.FloatField()
     is_renewable = models.BooleanField()
     type = models.TextField()
     efficiency = models.FloatField()
 
 
-class ProsumerEnergyConsumptionSystem(__ProsumerSubComponentMixin, DemandResponseAdaptiveEntityMixin, models.Model):
+class ProsumerEnergyConsumptionSystem(DemandResponseAdaptiveEntityMixin, models.Model):
+    prosumer = models.ForeignKey(Prosumer, on_delete=models.PROTECT, related_name="consumptions")
+    is_online = models.BooleanField()
+
     max_power = models.FloatField()
 
 
-class ProsumerEnergyStorageSystem(__ProsumerSubComponentMixin, DemandResponseAdaptiveEntityMixin, models.Model):
+class ProsumerEnergyStorageSystem(DemandResponseAdaptiveEntityMixin, models.Model):
+    prosumer = models.ForeignKey(Prosumer, on_delete=models.PROTECT, related_name="storages")
+    is_online = models.BooleanField()
+
     max_capacity = models.FloatField()
     usable_capacity = models.FloatField()
     max_charge_rate = models.FloatField()

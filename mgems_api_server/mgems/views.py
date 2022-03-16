@@ -7,19 +7,10 @@ from django_filters.rest_framework import (
     ChoiceFilter,
     NumberFilter,
 )
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.serializers import ModelSerializer
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
 
 from mgems.models import Prosumer
-
-
-class ProsumerSerialzier(ModelSerializer):
-    """Serializer for Prosumer"""
-
-    class Meta:
-        model = Prosumer
-        fields = ("id", "max_import_power", "max_export_power", "is_online", "is_trader", "is_dr_adaptive")
+from mgems.serializers import ProsumerSerialzier
 
 
 class ProsumerFilter(FilterSet):
