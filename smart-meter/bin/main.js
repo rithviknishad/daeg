@@ -105,7 +105,13 @@ function gracefullyExit() {
 process.on("SIGINT", gracefullyExit);
 process.on("SIGTERM", gracefullyExit);
 
+function solar_operations(client, address, index) {
+  client.publish(`prosumers/${VP_ADDRESS}/generation/0`);
+}
+
 function every15Mins() {
+  solar_operations(client, VP_ADDRESS, index);
+
   log("TODO: Invoke callbacks for current state estimators...");
 }
 
