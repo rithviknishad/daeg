@@ -25,7 +25,7 @@ class ProsumerSerialzier(ModelSerializer):
 class ProsumerFilter(FilterSet):
     """Filter sets for Prosumers"""
 
-    id = NumberFilter()
+    id = CharFilter(lookup_expr="icontains")
 
 
 class ProsumerViewSet(ModelViewSet):
