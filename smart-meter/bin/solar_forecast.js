@@ -1,3 +1,6 @@
+// TODO: json parse the solar api data
+// TODO: mqtt publish to a topic
+
 let print = console.log;
 
 const https = require("https");
@@ -7,6 +10,8 @@ const options = {
   path: "/world_pv_power/estimated_actuals?latitude=11.749142&longitude=75.489035&capacity=5&tilt=12&azimuth=180&hours=168&format=json&api_key=LscmE7tIq2Jh44XyAgLCuTmgXP-Ce8eG",
   method: "GET",
 };
+
+let pv_estimates = [];
 
 const req = https.request(options, (res) => {
   console.log(`statusCode: ${res.statusCode}`);
@@ -22,7 +27,7 @@ const req = https.request(options, (res) => {
 
       let data = JSON.parse(body);
       data.estimated_actuals.forEach((row) => {
-        console.log(row.period_end + "-" + row.pv_estimate);
+        // console.log(row.period_end + "-" + row.pv_estimate);
       });
     });
 });
