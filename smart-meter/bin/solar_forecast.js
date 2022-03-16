@@ -1,3 +1,6 @@
+// TODO: json parse the solar api data
+// TODO: mqtt publish to a topic
+
 let print = console.log;
 
 const https = require("https");
