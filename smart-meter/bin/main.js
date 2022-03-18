@@ -85,13 +85,13 @@ client
     success(`Connected to ${MGEMS_MQTT_URL}`);
   })
   .on("disconnect", () => {
-    error("MQTT Disconnected");
+    error("MQTT client disconnected.");
   })
   .on("close", () => {
-    error("MQTT connection closed");
+    error("MQTT connection closed.");
   })
   .on("end", () => {
-    error("MQTT connection ended");
+    error("MQTT connection ended.");
   });
 
 function gracefullyExit() {
@@ -105,7 +105,14 @@ function gracefullyExit() {
 process.on("SIGINT", gracefullyExit);
 process.on("SIGTERM", gracefullyExit);
 
+function solar_operations(client, address, index) {
+  let solar_forecast = pv_estimates[index];
+  client.publish(`prosumers/${VP_ADDRESS}/generation/0`, solar_forecast);
+}
+
 function every15Mins() {
+  solar_operations(client, VP_ADDRESS, index);
+
   log("TODO: Invoke callbacks for current state estimators...");
 }
 
