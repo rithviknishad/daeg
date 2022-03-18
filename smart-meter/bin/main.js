@@ -113,6 +113,11 @@ function solar_operations(client, address, index) {
 function every15Mins() {
   solar_operations(client, VP_ADDRESS, index);
 
+  // TODO: invoke generation state update callbacks
+  // TODO: invoke consumption state update callbacks
+  // TODO: evaluate self-consumption
+  // TODO: invoke battery management system update callbacks
+
   log("TODO: Invoke callbacks for current state estimators...");
 }
 
