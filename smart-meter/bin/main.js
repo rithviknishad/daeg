@@ -3,7 +3,6 @@ require("dotenv").config();
 const chalk = require("chalk");
 const mqtt = require("mqtt");
 const log = require("./logger");
-const solar_forecast = require("./solar_forecast");
 
 /**
  * Vaidyuti Protocol Address assigned to the prosumer.
@@ -57,9 +56,6 @@ const MQTT_USERNAME = `${VP_ADDRESS}`;
  */
 const MQTT_PASSWORD = `${VP_ADDRESS}`;
 
-// TODO: register prosumer to MGEMS server using HTTP POST
-// TODO: gracefully terminate with exit code 1, if response != OK
-
 log.log(`Connecting to ${MGEMS_MQTT_URL}`);
 const client = mqtt.connect(MGEMS_MQTT_URL, {
   clientId: MQTT_CLIENT_ID,
@@ -101,7 +97,12 @@ function solar_operations(client, address, index) {
   client.publish(`prosumers/${VP_ADDRESS}/generation/0`, solar_forecast);
 }
 
-function every15Mins() {
+function prosumerSetup() {
+  // TODO: register prosumer to MGEMS server using HTTP POST
+  // TODO: gracefully terminate with exit code 1, if response != OK
+}
+
+function prosumerLoop() {
   solar_operations(client, VP_ADDRESS, index);
 
   // TODO: invoke generation state update callbacks
@@ -109,7 +110,8 @@ function every15Mins() {
   // TODO: evaluate self-consumption
   // TODO: invoke battery management system update callbacks
 
-  log("TODO: Invoke callbacks for current state estimators...");
+  log.log("TODO: Invoke callbacks for current state estimators...");
 }
 
-setInterval(every15Mins, UPDATE_INTERVAL);
+prosumerSetup();
+setInterval(prosumerLoop, UPDATE_INTERVAL);
