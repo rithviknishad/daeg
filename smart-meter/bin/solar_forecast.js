@@ -13,25 +13,19 @@ const options = {
 
 let pv_estimates = [];
 
-const req = https.request(options, (res) => {
-  console.log(`statusCode: ${res.statusCode}`);
-
-  var bodyChunks = [];
-  res
-    .on("data", function (chunk) {
-      // You can process streamed parts here...
-      bodyChunks.push(chunk);
-    })
-    .on("end", function () {
-      var body = Buffer.concat(bodyChunks);
-
-      let data = JSON.parse(body);
-      data.estimated_actuals.forEach((row) => {
-        // console.log(row.period_end + "-" + row.pv_estimate);
+https
+  .request(options, (res) => {
+    let bodyChunks = [];
+    res
+      .on("data", (data) => {
+        bodyChunks.push(data);
+      })
+      .on("end", function () {
+        let data = JSON.parse(Buffer.concat(bodyChunks));
+        data.estimated_actuals.forEach((row) => {
+          pv_estimates.push(row.pv_estimate);
+        });
       });
-    });
-});
-
-req.on("error", console.error);
-
-req.end();
+  })
+  .on("error", console.error)
+  .end();
