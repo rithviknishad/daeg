@@ -18,6 +18,12 @@ const LONGITUDE = process.env.LONGITUDE || 75.49;
 log.trace(`Prosumer location=(${LATITUDE}, ${LONGITUDE})`);
 
 /**
+ * Prosumer's PV system installed capacity in KW.
+ */
+const PV_SYSTEM_CAPACITY = process.env.PV_SYSTEM_CAPACITY || 5;
+log.trace(`Prosumer PV system installed capacity=${PV_SYSTEM_CAPACITY} KW`);
+
+/**
  * The speed at which the prosumer meters clock should run.
  * Defaults to 1x.
  * Eg: `SIMULATION_SPEED=2` means the clock shall run two times faster than
