@@ -11,6 +11,13 @@ const VP_ADDRESS = process.env.VP_ADDRESS || "no-vp-addr";
 log.trace(`Starting prosumer with VP_ADDRESS=${VP_ADDRESS}`);
 
 /**
+ * Prosumer's geographic location attributes: latitude, longitude.
+ */
+const LATITUDE = process.env.LATITUDE || 11.75;
+const LONGITUDE = process.env.LONGITUDE || 75.49;
+log.trace(`Prosumer location=(${LATITUDE}, ${LONGITUDE})`);
+
+/**
  * The speed at which the prosumer meters clock should run.
  * Defaults to 1x.
  * Eg: `SIMULATION_SPEED=2` means the clock shall run two times faster than
