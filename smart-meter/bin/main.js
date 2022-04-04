@@ -24,6 +24,12 @@ const PV_SYSTEM_CAPACITY = process.env.PV_SYSTEM_CAPACITY || 5;
 log.trace(`Prosumer PV system installed capacity=${PV_SYSTEM_CAPACITY} KW`);
 
 /**
+ * Solcast API Key for solar forecasting.
+ */
+const SOLCAST_API_KEY = process.env.SOLCAST_API_KEY;
+log.trace(`Prosumer Solcast API key=${SOLCAST_API_KEY}`);
+
+/**
  * The speed at which the prosumer meters clock should run.
  * Defaults to 1x.
  * Eg: `SIMULATION_SPEED=2` means the clock shall run two times faster than
