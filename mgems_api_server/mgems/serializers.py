@@ -36,9 +36,9 @@ class ProsumerEnergyStorageSystem(ModelSerializer):
 class ProsumerSerialzier(ModelSerializer):
     """Serializer for Prosumer Model"""
 
-    generations = ProsumerEnergyGenerationSystemSerialier(many=True)
-    consumptions = ProsumerEnergyConsumptionSystem(many=True)
-    storages = ProsumerEnergyStorageSystem(many=True)
+    # generations = ProsumerEnergyGenerationSystemSerialier(many=True)
+    # consumptions = ProsumerEnergyConsumptionSystem(many=True)
+    # storages = ProsumerEnergyStorageSystem(many=True)
 
     class Meta:
         model = Prosumer
@@ -49,7 +49,4 @@ class ProsumerSerialzier(ModelSerializer):
             "is_online",
             "is_trader",
             "is_dr_adaptive",
-            "generations",
-            "consumptions",
-            "storages",
         )
