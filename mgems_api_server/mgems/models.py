@@ -1,6 +1,13 @@
+from math import asin, cos, radians, sin, sqrt
 from typing import List
-from django.db import models
-from math import radians, cos, sin, asin, sqrt
+
+from django.contrib.postgres.operations import CreateExtension
+from django.db import migrations, models
+
+
+class Migration(migrations.Migration):
+
+    operations = [CreateExtension("postgis"), ...]
 
 
 class _ModelMixin(models.Model):
