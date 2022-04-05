@@ -3,6 +3,7 @@ require("dotenv").config();
 const chalk = require("chalk");
 const mqtt = require("mqtt");
 const log = require("./logger");
+const csv = require("./csvtest");
 
 /**
  * Vaidyuti Protocol Address assigned to the prosumer.
@@ -122,17 +123,22 @@ function prosumerSetup() {
   // TODO: register prosumer to MGEMS server using HTTP POST
   // TODO: gracefully terminate with exit code 1, if response != OK
 }
+let counterindex = 0;
 
 function prosumerLoop() {
   solar_operations(client, VP_ADDRESS, index);
-
+  let current_load = csv.load_profile[counterindex];
+  console.log(current_load);
+  counterindex = counterindex + 1;
   // TODO: invoke generation state update callbacks
   // TODO: invoke consumption state update callbacks
   // TODO: evaluate self-consumption
   // TODO: invoke battery management system update callbacks
-
-  log.log("TODO: Invoke callbacks for current state estimators...");
 }
 
 prosumerSetup();
-setInterval(prosumerLoop, UPDATE_INTERVAL);
+while(!csv.load_profile_ready){}
+
+
+  setInterval(prosumerLoop, UPDATE_INTERVAL);
+
