@@ -145,7 +145,11 @@ function prosumerLoop() {
   // TODO: evaluate self-consumption
   // TODO: invoke battery management system update callbacks
 
-  client.publish(`prosumers/${VP_ADDRESS}/generation/`, csv[index]);
+  client.publish(`prosumers/${VP_ADDRESS}/generation/`, csv[index].generation);
+  client.publish(
+    `prosumers/${VP_ADDRESS}/consumption/`,
+    csv[index].consumption
+  );
 }
 
 prosumerSetup();
