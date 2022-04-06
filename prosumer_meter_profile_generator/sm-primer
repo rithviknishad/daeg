@@ -1,0 +1,2 @@
+#!bash
+dart bin/prosumer_meter_profile_generator.dart "$@"
