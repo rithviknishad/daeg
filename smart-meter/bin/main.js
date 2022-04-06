@@ -163,7 +163,7 @@ function prosumerLoop() {
   ) {
     batteryEnergy = batteryEnergy + net_charge_rate;
   }
-  client.publish(`prosumers/${VP_ADDRESS}/storage`, batteryEnergy);
+  client.publish(`prosumers/${VP_ADDRESS}/storage`, batteryEnergy.toString());
 
   prosumerSetup();
 }
