@@ -159,6 +159,14 @@ function prosumerLoop() {
     `prosumers/${VP_ADDRESS}/consumption/`,
     csv[index].consumption
   );
-}
+  let net_charge_rate = csv[index].generation - csv[index].consumption;
+  if (
+    batteryEnergy + net_charge_rate > 0 &&
+    batteryEnergy + net_charge_rate < STORAGE_SYSTEM_CAPACITY
+  ) {
+    batteryEnergy = batteryEnergy + net_charge_rate;
+    client.publish(`prosumers/${VP_ADDRESS}/storage/`, batteryEnergy);
+  }
 
-prosumerSetup();
+  prosumerSetup();
+}
