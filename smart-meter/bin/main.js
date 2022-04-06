@@ -123,22 +123,26 @@ function prosumerSetup() {
   // TODO: register prosumer to MGEMS server using HTTP POST
   // TODO: gracefully terminate with exit code 1, if response != OK
 }
-let counterindex = 0;
-
+//let counterindex = 0;
+ let load = [1,2,3,4];
+  let solar = [2,7,8,9];
+  let index = 0;
 function prosumerLoop() {
-  solar_operations(client, VP_ADDRESS, index);
-  let current_load = csv.load_profile[counterindex];
-  console.log(current_load);
-  counterindex = counterindex + 1;
+  // solar_operations(client, VP_ADDRESS, index);
+  // let current_load = csv.load_profile[counterindex];
+  //console.log(current_load);
+  //counterindex = counterindex + 1;
   // TODO: invoke generation state update callbacks
   // TODO: invoke consumption state update callbacks
   // TODO: evaluate self-consumption
   // TODO: invoke battery management system update callbacks
+  let solarvalue = solar[index];
+  index = index % 4;
+  client.publish(`prosumers/${VP_ADDRESS}/generation/`, solarvalue.toString);
+
+
 }
 
 prosumerSetup();
-while(!csv.load_profile_ready){}
 
-
-  setInterval(prosumerLoop, UPDATE_INTERVAL);
-
+setInterval(prosumerLoop, UPDATE_INTERVAL);

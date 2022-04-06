@@ -1,6 +1,6 @@
 const fs = require("fs");
 const Papa = require("papaparse");
-
+//function load_func(onfinish_cb) {
 const load_profile = [];
 let load_profile_ready = false;
 
@@ -10,5 +10,5 @@ fs.createReadStream("load_profile.csv")
     load_profile.push(data.Load);
   })
   .on("end", () => {
-    load_profile_ready = true;
+    load_profile_ready =false;
   });
