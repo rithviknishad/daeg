@@ -124,9 +124,9 @@ function prosumerSetup() {
   // TODO: gracefully terminate with exit code 1, if response != OK
 }
 //let counterindex = 0;
- let load = [1,2,3,4];
-  let solar = [2,7,8,9];
-  let index = 0;
+let load = [1, 2, 3, 4];
+let solar = [2, 7, 8, 9];
+let index = 0;
 function prosumerLoop() {
   // solar_operations(client, VP_ADDRESS, index);
   // let current_load = csv.load_profile[counterindex];
@@ -137,10 +137,8 @@ function prosumerLoop() {
   // TODO: evaluate self-consumption
   // TODO: invoke battery management system update callbacks
   let solarvalue = solar[index];
-  index = index % 4;
-  client.publish(`prosumers/${VP_ADDRESS}/generation/`, solarvalue.toString);
-
-
+  index = (index + 1) % 4;
+  client.publish(`prosumers/${VP_ADDRESS}/generation/`, solarvalue.toString());
 }
 
 prosumerSetup();
