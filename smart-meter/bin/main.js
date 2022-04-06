@@ -3,7 +3,8 @@ require("dotenv").config();
 const chalk = require("chalk");
 const mqtt = require("mqtt");
 const log = require("./logger");
-//const csv = require("./csvtest");
+const fs = require("fs");
+const Papa = require("papaparse");
 
 /**
  * Vaidyuti Protocol Address assigned to the prosumer.
@@ -23,6 +24,12 @@ log.trace(`Prosumer location=(${LATITUDE}, ${LONGITUDE})`);
  */
 const PV_SYSTEM_CAPACITY = process.env.PV_SYSTEM_CAPACITY || 5;
 log.trace(`Prosumer PV system installed capacity=${PV_SYSTEM_CAPACITY} KW`);
+
+/**
+ * Prosumer's Energy system installed capacity in KWH.
+ */
+const STORAGE_SYSTEM_CAPACITY = process.env.STORAGE_SYSTEM_CAPACITY || 5;
+log.trace(`Prosumer storage system capacity=${STORAGE_SYSTEM_CAPACITY} KWH`);
 
 /**
  * Solcast API Key for solar forecasting.
@@ -123,9 +130,9 @@ function prosumerSetup() {
   // TODO: register prosumer to MGEMS server using HTTP POST
   // TODO: gracefully terminate with exit code 1, if response != OK
 }
-const fs = require("fs");
-const Papa = require("papaparse");
+
 const csv = [];
+
 fs.createReadStream("profile1.csv")
   .pipe(Papa.parse(Papa.NODE_STREAM_INPUT, { header: true }))
   .on("data", (data) => {
@@ -134,10 +141,12 @@ fs.createReadStream("profile1.csv")
   .on("end", () => {
     setInterval(prosumerLoop, UPDATE_INTERVAL);
   });
+
 let index = 0;
+let batteryEnergy = STORAGE_SYSTEM_CAPACITY * 0.5; // in kWH
 
 function prosumerLoop() {
-  index = index % csv.length;
+  index = index % (csv.length - 1);
   index = index + 1;
 
   // TODO: invoke generation state update callbacks
