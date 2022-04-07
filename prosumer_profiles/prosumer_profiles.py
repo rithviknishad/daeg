@@ -84,10 +84,10 @@ def generate_for_house(range_profile: ProfileRange, days: int, index: int):
 def main():
 
     # No. of houses
-    houses = 10
+    houses = 128
 
     # No. of days of data to be generated.
-    days: Final = 14  # 2 Weeks
+    days: Final = 1
 
     # get range profile from csv
     range_profile: Final = get_norm_range_profile("normalized_house_load_range.csv")

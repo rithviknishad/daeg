@@ -9,7 +9,7 @@ import 'solar_estimate.dart';
 
 void main(List<String> arguments) {
   final runner = CommandRunner(
-    'sm-primer',
+    'profile-manager',
     "Batch energy consumption and generation profile management tool for Smart Meter.",
   );
 
@@ -34,8 +34,7 @@ void main(List<String> arguments) {
     )
     ..addOption('latitude', defaultsTo: "11.3")
     ..addOption('longitude', defaultsTo: "74.6")
-    ..addOption('solar-capacity', defaultsTo: "5")
-    ..addCommand('cache', cacheCommand);
+    ..addOption('solar-capacity', defaultsTo: "5");
 
   final solcastApiKey = Platform.environment["SOLCAST_API_KEY"];
   if (solcastApiKey == null) {
@@ -75,6 +74,21 @@ class CacheCommand extends Command {
         valueHelp: "5  # signifies 5 KW PV System",
         defaultsTo: "1",
       );
+  }
+}
+
+class MakeCommand extends Command {
+  @override
+  final name = "make";
+
+  @override
+  final description =
+      "Generate a profile based on the available cache and input profile";
+
+  MakeCommand() {
+    argParser
+      ..addOption("load-profile")
+      ..addOption("generation-profile");
   }
 }
 
