@@ -87,7 +87,7 @@ def main():
     houses = 128
 
     # No. of days of data to be generated.
-    days: Final = 1
+    days: Final = 7
 
     # get range profile from csv
     range_profile: Final = get_norm_range_profile("normalized_house_load_range.csv")
