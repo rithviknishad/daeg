@@ -87,7 +87,10 @@ class MakeCommand extends Command {
 
   MakeCommand() {
     argParser
-      ..addOption("load-profile")
+      ..addOption(
+        "load-profile",
+        defaultsTo: 
+      )
       ..addOption("generation-profile");
   }
 }
