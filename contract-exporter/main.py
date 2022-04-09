@@ -77,6 +77,7 @@ class AtomicTransaction(Transaction):
     """
 
 
+@dataclass
 class AggregateTransaction(Transaction):
     # TODO WARN: @rithvik this model is not yet completed.
     pass
