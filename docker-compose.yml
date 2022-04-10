@@ -9,14 +9,16 @@ networks:
 
 services:
   # VerneMQ MQTT Server
-  vernemq:
-    image: vernemq/vernemq
+  emqx:
+    image: emqx/emqx:4.4.2
     restart: always
     ports:
       - 1883:1883
-    environment:
-      - DOCKER_VERNEMQ_ALLOW_ANONYMOUS=on # Disabled for testing
-      - DOCKER_VERNEMQ_ACCEPT_EULA=yes
+      - 8081:8081
+      - 8083:8083
+      - 8084:8084
+      - 8883:8883
+      - 18083:18083
     networks:
       - internal
       - public
@@ -38,12 +40,13 @@ services:
     volumes:
       - ./data/telegraf.conf:/etc/telegraf/telegraf.conf:ro
     environment:
+      - MQTT_SERVER=tcp://emqx:1883
       - INFLUX_HOST=http://influxdb:8086
       - INFLUX_ORG=Vaidyuti
       - INFLUX_TOKEN=${INFLUX_TOKEN}
       - INFLUX_BUCKET=${INFLUX_BUCKET}
     depends_on:
-      - vernemq
+      - emqx
       - influxdb
     networks:
       - internal
