@@ -131,7 +131,7 @@ function prosumerSetup() {
   // TODO: gracefully terminate with exit code 1, if response != OK
 }
 
-/** 
+/**
  * The Generation , Consumption , Storage and Import uniits of each prosumer.
  */
 const csv = [];
