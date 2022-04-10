@@ -131,6 +131,9 @@ function prosumerSetup() {
   // TODO: gracefully terminate with exit code 1, if response != OK
 }
 
+/** 
+ * The Generation , Consumption , Storage and Import uniits of each prosumer.
+ */
 const csv = [];
 
 fs.createReadStream("profile1.csv")
@@ -149,21 +152,20 @@ function prosumerLoop() {
   index = index % (csv.length - 1);
   index = index + 1;
 
-  // TODO: invoke generation state update callbacks
-  // TODO: invoke consumption state update callbacks
-  // TODO: evaluate self-consumption
-  // TODO: invoke battery management system update callbacks
-
   client.publish(`prosumers/${VP_ADDRESS}/generation`, csv[index].generation);
   client.publish(`prosumers/${VP_ADDRESS}/consumption`, csv[index].consumption);
   let net_charge_rate = csv[index].generation - csv[index].consumption;
+  let net_import = 0;
   if (
     batteryEnergy + net_charge_rate > 0 &&
     batteryEnergy + net_charge_rate < STORAGE_SYSTEM_CAPACITY
   ) {
     batteryEnergy = batteryEnergy + net_charge_rate;
+  } else {
+    net_import = -net_charge_rate;
   }
   client.publish(`prosumers/${VP_ADDRESS}/storage`, batteryEnergy.toString());
+  client.publish(`prosumers/${VP_ADDRESS}/import`, net_import.toString());
 
   prosumerSetup();
 }
