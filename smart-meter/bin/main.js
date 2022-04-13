@@ -145,16 +145,14 @@ fs.createReadStream("profile1.csv")
     setInterval(prosumerLoop, UPDATE_INTERVAL);
   });
 
-let index = 0;
+let c_itr = 0;
 let batteryEnergy = STORAGE_SYSTEM_CAPACITY * 0.5; // in kWH
 
 function prosumerLoop() {
-  index = index % (csv.length - 1);
-  index = index + 1;
+  c_itr = c_itr % (csv.length - 1);
+  c_itr = c_itr + 1;
 
-  client.publish(`prosumers/${VP_ADDRESS}/generation`, csv[index].generation);
-  client.publish(`prosumers/${VP_ADDRESS}/consumption`, csv[index].consumption);
-  let net_charge_rate = csv[index].generation - csv[index].consumption;
+  let net_charge_rate = csv[c_itr].generation - csv[c_itr].consumption;
   let net_import = 0;
   if (
     batteryEnergy + net_charge_rate > 0 &&
@@ -164,8 +162,17 @@ function prosumerLoop() {
   } else {
     net_import = -net_charge_rate;
   }
-  client.publish(`prosumers/${VP_ADDRESS}/storage`, batteryEnergy.toString());
-  client.publish(`prosumers/${VP_ADDRESS}/import`, net_import.toString());
+
+  client.publish(
+    `prosumers/${VP_ADDRESS}/generation`,
+    `${csv[c_itr].generation}`
+  );
+  client.publish(
+    `prosumers/${VP_ADDRESS}/consumption`,
+    `${csv[c_itr].consumption}`
+  );
+  client.publish(`prosumers/${VP_ADDRESS}/storage`, `${batteryEnergy}`);
+  client.publish(`prosumers/${VP_ADDRESS}/import`, `${net_import}`);
 
   prosumerSetup();
 }
