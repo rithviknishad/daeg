@@ -64,6 +64,12 @@ log.trace(
 );
 
 /**
+ * The path to mock CSV profile to be used by the smart-meter.
+ */
+const MOCK_CSV_PROFILE_PATH =
+  process.env.MOCK_CSV_PROFILE_PATH || "profile.csv";
+
+/**
  * The resource link to where MQTT server of the MGEMS is hosted.
  */
 const MGEMS_MQTT_URL = process.env.MGEMS_MQTT_URL || "mqtt://127.0.0.1";
@@ -136,7 +142,7 @@ function prosumerSetup() {
  */
 const csv = [];
 
-fs.createReadStream("profile1.csv")
+fs.createReadStream(MOCK_CSV_PROFILE_PATH)
   .pipe(Papa.parse(Papa.NODE_STREAM_INPUT, { header: true }))
   .on("data", (data) => {
     csv.push(data);
