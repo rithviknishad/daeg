@@ -47,13 +47,11 @@ void main(List<String> arguments) {
     print(error);
     exit(64); // Exit code 64 indicates a usage error.
   });
-
-  // fetchSolarEstimates(11.3, 74.2, 5, solcastApiKey);
 }
 
 class CacheCommand extends Command {
   @override
-  final name = "cache";
+  final name = "cache-solar";
 
   @override
   final description = "Cache solar profiles using Solcast API and save as CSV.";
@@ -86,10 +84,12 @@ class MakeCommand extends Command {
 
   MakeCommand() {
     argParser
-      ..addOption("quantity", defaultsTo: "1")
+      ..addOption("profiles", help: "The number of profiles to be generated")
       ..addOption("parent-prosumer-id", defaultsTo: "ff:ff:ff:ff:ff:ff")
       ..addOption("load-profiles", defaultsTo: "pool/consumption")
-      ..addOption("generation-profiles", defaultsTo: "pool/generation");
+      ..addOption("generation-profiles", defaultsTo: "pool/generation")
+      ..addOption("output-prefix", abbr: 'o', defaultsTo: "makes")
+      ..addFlag("output-suffix-datetime", defaultsTo: true);
   }
 }
 
