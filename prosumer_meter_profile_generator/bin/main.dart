@@ -1,11 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 
-import 'solar_estimate.dart';
-import 'solcast_query_params.dart';
+import 'utils/solar_estimate.dart';
+import 'utils/solcast_query_params.dart';
 
 void main(List<String> arguments) {
   final runner = CommandRunner(
@@ -15,29 +14,6 @@ void main(List<String> arguments) {
 
   runner.addCommand(CacheCommand());
   runner.addCommand(MakeCommand());
-
-  final parser = ArgParser()
-    ..addOption(
-      'output',
-      help: "The path of the output CSV file",
-      defaultsTo: "output.csv",
-      valueHelp: "<prosumer_id>.csv",
-    )
-    ..addOption(
-      'interval',
-      help: "Time delta of data points in seconds",
-      defaultsTo: "900",
-      valueHelp: "900",
-    )
-    ..addOption(
-      'source-load-profile',
-      help: "The path to load profile",
-      defaultsTo: "load_profile.csv",
-      valueHelp: "path/to/load_profile.csv",
-    )
-    ..addOption('latitude', defaultsTo: "11.3")
-    ..addOption('longitude', defaultsTo: "74.6")
-    ..addOption('solar-capacity', defaultsTo: "5");
 
   final solcastApiKey = Platform.environment["SOLCAST_API_KEY"];
   if (solcastApiKey == null) {
@@ -85,9 +61,7 @@ class CacheCommand extends Command {
   Future<void> fetchSolarEstimates(SolcastApiQuery solcastApiQuery) async {
     final response = await solcastApiQuery.response;
     final data = jsonDecode(response.body);
-
     final records = data['estimated_actuals'];
-
     for (final record in records) {
       print(SolarEstimate.fromJson(record));
     }
@@ -107,11 +81,35 @@ class MakeCommand extends Command {
 
   MakeCommand() {
     argParser
-      ..addOption("profiles", help: "The number of profiles to be generated")
-      ..addOption("parent-prosumer-id", defaultsTo: "ff:ff:ff:ff:ff:ff")
-      ..addOption("load-profiles", defaultsTo: "pool/consumption")
-      ..addOption("generation-profiles", defaultsTo: "pool/generation")
-      ..addOption("output-prefix", abbr: 'o', defaultsTo: "makes")
+      ..addOption(
+        "profiles",
+        valueHelp: "int",
+        help: "The number of profiles to be generated",
+      )
+      ..addOption(
+        "parent-prosumer-id",
+        valueHelp: "prosumer-id",
+        defaultsTo: "ff:ff:ff:ff:ff:ff",
+      )
+      ..addOption(
+        "load-profiles",
+        defaultsTo: "pool/consumption",
+      )
+      ..addOption(
+        "generation-profiles",
+        defaultsTo: "pool/generation",
+      )
+      ..addOption(
+        "output-prefix",
+        abbr: 'o',
+        defaultsTo: "makes",
+      )
+      ..addOption(
+        "interval",
+        valueHelp: "seconds",
+        defaultsTo: "900",
+        help: "Time delta of data points in seconds",
+      )
       ..addFlag("output-suffix-datetime", defaultsTo: true);
   }
 }
