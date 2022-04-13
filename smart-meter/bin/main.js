@@ -75,6 +75,10 @@ const MOCK_CSV_PROFILE_PATH =
 const MGEMS_MQTT_URL = process.env.MGEMS_MQTT_URL || "mqtt://127.0.0.1";
 
 /**
+ * the initial selling price
+ */
+const SELLING_PRICE = process.env.SELLING_PRICE ;
+/**
  * The MQTT Client ID of the prosumer.
  */
 const MQTT_CLIENT_ID = `prosumer-${VP_ADDRESS}`;
@@ -142,6 +146,8 @@ function prosumerSetup() {
  */
 const csv = [];
 
+
+
 fs.createReadStream(MOCK_CSV_PROFILE_PATH)
   .pipe(Papa.parse(Papa.NODE_STREAM_INPUT, { header: true }))
   .on("data", (data) => {
@@ -164,7 +170,12 @@ function prosumerLoop() {
 
   let net_charge_rate = csv[c_itr].generation - csv[c_itr].consumption;
   let net_import = 0;
+  let total_gen = 0;
+  let total_cons = 0;
+  total_gen = total_gen + csv[c_itr].generation;
+  total_cons = total_cons + csv[c_itr].consumption;
 
+  
   if (
     batteryEnergy + net_charge_rate > 0 &&
     batteryEnergy + net_charge_rate < STORAGE_SYSTEM_CAPACITY
@@ -173,11 +184,13 @@ function prosumerLoop() {
   } else {
     net_import = -net_charge_rate;
   }
-
+  
+     
   updateState("generation", csv[c_itr].generation);
   updateState("consumption", csv[c_itr].consumption);
   updateState("storage", batteryEnergy);
   updateState("import", net_import);
+  
 }
 
 prosumerSetup();
