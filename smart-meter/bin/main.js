@@ -154,6 +154,7 @@ function prosumerLoop() {
 
   let net_charge_rate = csv[c_itr].generation - csv[c_itr].consumption;
   let net_import = 0;
+
   if (
     batteryEnergy + net_charge_rate > 0 &&
     batteryEnergy + net_charge_rate < STORAGE_SYSTEM_CAPACITY
@@ -173,6 +174,6 @@ function prosumerLoop() {
   );
   client.publish(`prosumers/${VP_ADDRESS}/storage`, `${batteryEnergy}`);
   client.publish(`prosumers/${VP_ADDRESS}/import`, `${net_import}`);
-
-  prosumerSetup();
 }
+
+prosumerSetup();
