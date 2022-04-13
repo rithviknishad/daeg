@@ -82,16 +82,14 @@ class MakeCommand extends Command {
   final name = "make";
 
   @override
-  final description =
-      "Generate a profile based on the available cache and input profile";
+  final description = "Generates profiles based on the profiles.";
 
   MakeCommand() {
     argParser
-      ..addOption(
-        "load-profile",
-        defaultsTo: 
-      )
-      ..addOption("generation-profile");
+      ..addOption("quantity", defaultsTo: "1")
+      ..addOption("parent-prosumer-id", defaultsTo: "ff:ff:ff:ff:ff:ff")
+      ..addOption("load-profiles", defaultsTo: "pool/consumption")
+      ..addOption("generation-profiles", defaultsTo: "pool/generation");
   }
 }
 
