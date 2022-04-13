@@ -3,15 +3,18 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:http/http.dart' as http;
 
 import 'solar_estimate.dart';
+import 'solcast_query_params.dart';
 
 void main(List<String> arguments) {
   final runner = CommandRunner(
     'profile-manager',
     "Batch energy consumption and generation profile management tool for Smart Meter.",
   );
+
+  runner.addCommand(CacheCommand());
+  runner.addCommand(MakeCommand());
 
   final parser = ArgParser()
     ..addOption(
@@ -60,8 +63,8 @@ class CacheCommand extends Command {
     argParser
       ..addOption(
         "api-key",
-        help: "Solcast API Key",
-        valueHelp: Platform.environment["SOLCAST_API_KEY"],
+        help: "Solcast API Key. Defaults from environment.",
+        valueHelp: "SOLCAST_API_KEY",
         defaultsTo: Platform.environment["SOLCAST_API_KEY"],
       )
       ..addOption("latitude", mandatory: true)
@@ -69,9 +72,29 @@ class CacheCommand extends Command {
       ..addOption(
         "capacity",
         help: "Installed capacity of PV system in KW",
-        valueHelp: "5  # signifies 5 KW PV System",
+        valueHelp: "in kw",
         defaultsTo: "1",
       );
+  }
+
+  @override
+  Future<void> run() async {
+    stdout.writeln("Caching solar...");
+  }
+
+  Future<void> fetchSolarEstimates(SolcastApiQuery solcastApiQuery) async {
+    final response = await solcastApiQuery.response;
+    final data = jsonDecode(response.body);
+
+    final records = data['estimated_actuals'];
+
+    for (final record in records) {
+      print(SolarEstimate.fromJson(record));
+    }
+  }
+
+  double lerpDouble(num a, num b, double t) {
+    return a + (b - a) * t;
   }
 }
 
@@ -91,26 +114,4 @@ class MakeCommand extends Command {
       ..addOption("output-prefix", abbr: 'o', defaultsTo: "makes")
       ..addFlag("output-suffix-datetime", defaultsTo: true);
   }
-}
-
-Future<void> fetchSolarEstimates(
-  double latitude,
-  double longitude,
-  double capacity,
-  String solcastApiKey,
-) async {
-  final res = await http.get(Uri.parse(
-      'https://api.solcast.com.au/world_pv_power/estimated_actuals?latitude=$latitude&longitude=$longitude&capacity=$capacity&tilt=12&azimuth=180&hours=168&format=json&api_key=$solcastApiKey'));
-
-  final data = jsonDecode(res.body);
-
-  final records = data['estimated_actuals'];
-
-  for (final record in records) {
-    print(SolarEstimate.fromJson(record));
-  }
-}
-
-double lerpDouble(num a, num b, double t) {
-  return a + (b - a) * t;
 }
