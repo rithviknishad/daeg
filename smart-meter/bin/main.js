@@ -154,6 +154,10 @@ fs.createReadStream(MOCK_CSV_PROFILE_PATH)
 let c_itr = 0;
 let batteryEnergy = STORAGE_SYSTEM_CAPACITY * 0.5; // in kWH
 
+function updateState(state_key, state_value) {
+  client.publish(`prosumers/${VP_ADDRESS}/${state_key}`, `${state_value}`);
+}
+
 function prosumerLoop() {
   c_itr = c_itr % (csv.length - 1);
   c_itr = c_itr + 1;
@@ -170,16 +174,10 @@ function prosumerLoop() {
     net_import = -net_charge_rate;
   }
 
-  client.publish(
-    `prosumers/${VP_ADDRESS}/generation`,
-    `${csv[c_itr].generation}`
-  );
-  client.publish(
-    `prosumers/${VP_ADDRESS}/consumption`,
-    `${csv[c_itr].consumption}`
-  );
-  client.publish(`prosumers/${VP_ADDRESS}/storage`, `${batteryEnergy}`);
-  client.publish(`prosumers/${VP_ADDRESS}/import`, `${net_import}`);
+  updateState("generation", csv[c_itr].generation);
+  updateState("consumption", csv[c_itr].consumption);
+  updateState("storage", batteryEnergy);
+  updateState("import", net_import);
 }
 
 prosumerSetup();
