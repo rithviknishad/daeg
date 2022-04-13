@@ -10,6 +10,12 @@ class Migration(migrations.Migration):
     operations = [CreateExtension("postgis"), ...]
 
 
+class ProsumerID(models.TextField):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.max_length = 39
+
+
 class _ModelMixin(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -27,7 +33,7 @@ class _ModelMixin(models.Model):
 
 
 class Prosumer(_ModelMixin, models.Model):
-    id = models.TextField(max_length=39, unique=True, primary_key=True)
+    id = ProsumerID(unique=True, primary_key=True)
     max_import_power = models.FloatField()
     max_export_power = models.FloatField()
     is_online = models.BooleanField()
@@ -90,3 +96,17 @@ class ProsumerEnergyStorageSystem(DemandResponseAdaptiveEntityMixin, models.Mode
     max_charge_rate = models.FloatField()
     max_discharge_rate = models.FloatField()
     type = models.TextField()
+
+
+class AtomicTransaction(models.Model):
+    producer = models.ForeignKey(Prosumer, on_delete=models.PROTECT, related_name="producer_of_transaction")
+    consumer = models.ForeignKey(Prosumer, on_delete=models.PROTECT, related_name="consumer_of_transaction")
+    opened_at = models.DateTimeField()
+    closed_at = models.DateTimeField()
+    energy_consumed = models.FloatField()
+    transmission_losses = models.FloatField()
+    unit_market_price = models.FloatField()
+
+    @property
+    def total_price(self) -> float:
+        return (self.energy_consumed + self.transmission_losses) * self.unit_market_price
