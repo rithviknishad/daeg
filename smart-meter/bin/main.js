@@ -33,6 +33,21 @@ const STORAGE_SYSTEM_CAPACITY = process.env.STORAGE_SYSTEM_CAPACITY || 5;
 log.trace(`Prosumer storage system capacity=${STORAGE_SYSTEM_CAPACITY} KWH`);
 
 /**
+ * The selling price when the power market is balanced.
+ */
+const NOMINAL_SELLING_PRICE = process.env.NOMINAL_SELLING_PRICE || 5;
+
+/**
+ * The selling price when the grids demand is higher than generation.
+ */
+const ON_PEAK_SELLING_PRICE = process.env.ON_PEAK_SELLING_PRICE || 10;
+
+/**
+ * The selling price when the grids generation is higher than demand.
+ */
+const OFF_PEAK_SELLING_PRICE = process.env.OFF_PEAK_SELLING_PRICE || 3;
+
+/**
  * Solcast API Key for solar forecasting.
  */
 const SOLCAST_API_KEY = process.env.SOLCAST_API_KEY;
@@ -80,10 +95,6 @@ const MGEMS_URL = process.env.MGEMS_URL || "dev.vaidyuti.io";
  */
 const MGEMS_MQTT_URL = process.env.MGEMS_MQTT_URL || `mqtt://${MGEMS_URL}`;
 
-/**
- * the initial selling price
- */
-const SELLING_PRICE = process.env.SELLING_PRICE;
 /**
  * The MQTT Client ID of the prosumer.
  */
