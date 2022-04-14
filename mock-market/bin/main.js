@@ -4,8 +4,9 @@ const options = {
   clean: true,
 };
 
-const VP_ADDRESS = process.env.VP_ADDRESS || "no-vp-addr";
-const UPDATE_INTERVAL = process.env.UPDATE_INTERVAL || 5000;
+const VP_ADDRESS =
+  process.env.VP_ADDRESS || "2001:0db8:85a3:0000:0000:8a2e:0370";
+const UPDATE_INTERVAL = process.env.UPDATE_INTERVAL || 1000;
 
 const client = mqtt.connect("mqtt://dev.vaidyuti.io");
 
