@@ -131,11 +131,6 @@ function gracefullyExit() {
 process.on("SIGINT", gracefullyExit);
 process.on("SIGTERM", gracefullyExit);
 
-function solar_operations(client, address, index) {
-  let solar_forecast = pv_estimates[index];
-  client.publish(`prosumers/${VP_ADDRESS}/generation/0`, solar_forecast);
-}
-
 function prosumerSetup() {
   // TODO: register prosumer to MGEMS server using HTTP POST
   // TODO: gracefully terminate with exit code 1, if response != OK
@@ -144,12 +139,12 @@ function prosumerSetup() {
 /**
  * The Generation , Consumption , Storage and Import uniits of each prosumer.
  */
-const csv = [];
+const profile = [];
 
 fs.createReadStream(MOCK_CSV_PROFILE_PATH)
   .pipe(Papa.parse(Papa.NODE_STREAM_INPUT, { header: true }))
   .on("data", (data) => {
-    csv.push(data);
+    profile.push(data);
   })
   .on("end", () => {
     setInterval(prosumerLoop, UPDATE_INTERVAL);
@@ -163,15 +158,15 @@ function updateState(state_key, state_value) {
 }
 
 function prosumerLoop() {
-  c_itr = c_itr % (csv.length - 1);
+  c_itr = c_itr % (profile.length - 1);
   c_itr = c_itr + 1;
 
-  let net_charge_rate = csv[c_itr].generation - csv[c_itr].consumption;
+  let net_charge_rate = profile[c_itr].generation - profile[c_itr].consumption;
   let net_import = 0;
   let total_gen = 0;
   let total_cons = 0;
-  total_gen = total_gen + csv[c_itr].generation;
-  total_cons = total_cons + csv[c_itr].consumption;
+  total_gen = total_gen + profile[c_itr].generation;
+  total_cons = total_cons + profile[c_itr].consumption;
 
   if (
     batteryEnergy + net_charge_rate > 0 &&
@@ -182,8 +177,8 @@ function prosumerLoop() {
     net_import = -net_charge_rate;
   }
 
-  updateState("generation", csv[c_itr].generation);
-  updateState("consumption", csv[c_itr].consumption);
+  updateState("generation", profile[c_itr].generation);
+  updateState("consumption", profile[c_itr].consumption);
   updateState("storage", batteryEnergy);
   updateState("import", net_import);
 }
