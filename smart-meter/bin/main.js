@@ -205,7 +205,7 @@ fs.createReadStream(MOCK_CSV_PROFILE_PATH)
     setInterval(prosumerLoop, CONTRACT_INTERVAL);
   });
 
-let cItr = 0;
+let i = 0;
 let batteryEnergy = STORAGE_SYSTEM_CAPACITY * 0.5; // in kWh
 
 function updateState(state_key, state_value) {
@@ -220,10 +220,9 @@ function computeExportPrice() {
 }
 
 function prosumerLoop() {
-  cItr = cItr % (profile.length - 1);
-  cItr = cItr + 1;
+  i = (i % (profile.length - 1)) + 1;
 
-  let net_charge_rate = profile[cItr].generation - profile[cItr].consumption;
+  let net_charge_rate = profile[i].generation - profile[i].consumption;
   let net_import = 0;
 
   if (
@@ -235,8 +234,8 @@ function prosumerLoop() {
     net_import = -net_charge_rate;
   }
 
-  updateState("generation", profile[cItr].generation);
-  updateState("consumption", profile[cItr].consumption);
+  updateState("generation", profile[i].generation);
+  updateState("consumption", profile[i].consumption);
   updateState("storage", batteryEnergy);
   updateState("import", net_import);
   updateState("export_price", computeExportPrice());
