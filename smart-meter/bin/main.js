@@ -24,28 +24,23 @@ log.trace(`Prosumer location=(${LATITUDE}, ${LONGITUDE})`);
  * Prosumer's PV system installed capacity in KW.
  */
 const PV_SYSTEM_CAPACITY = process.env.PV_SYSTEM_CAPACITY || 5;
-log.trace(`Prosumer PV system installed capacity=${PV_SYSTEM_CAPACITY} KW`);
+log.trace(`Prosumer PV system installed capacity=${PV_SYSTEM_CAPACITY} kW`);
 
 /**
  * Prosumer's Energy system installed capacity in KWH.
  */
 const STORAGE_SYSTEM_CAPACITY = process.env.STORAGE_SYSTEM_CAPACITY || 5;
-log.trace(`Prosumer storage system capacity=${STORAGE_SYSTEM_CAPACITY} KWH`);
+log.trace(`Prosumer storage system capacity=${STORAGE_SYSTEM_CAPACITY} kWh`);
 
 /**
- * The selling price when the power market is balanced.
+ * The nominal, on-peak and off-peak selling price limits of the prosumer.
  */
 const NOMINAL_SELLING_PRICE = process.env.NOMINAL_SELLING_PRICE || 5;
-
-/**
- * The selling price when the grids demand is higher than generation.
- */
 const ON_PEAK_SELLING_PRICE = process.env.ON_PEAK_SELLING_PRICE || 10;
-
-/**
- * The selling price when the grids generation is higher than demand.
- */
 const OFF_PEAK_SELLING_PRICE = process.env.OFF_PEAK_SELLING_PRICE || 3;
+log.trace(
+  `Prosumer selling price={${OFF_PEAK_SELLING_PRICE}, ${NOMINAL_SELLING_PRICE}, ${ON_PEAK_SELLING_PRICE}}`
+);
 
 /**
  * Solcast API Key for solar forecasting.
@@ -84,11 +79,13 @@ log.trace(
  */
 const MOCK_CSV_PROFILE_PATH =
   process.env.MOCK_CSV_PROFILE_PATH || "profile.csv";
+log.trace(`Using mock profile from=${MOCK_CSV_PROFILE_PATH}`);
 
 /**
  * The resource link to the associated MGEMS server of the prosumer.
  */
 const MGEMS_URL = process.env.MGEMS_URL || "dev.vaidyuti.io";
+log.trace(`Local micro-grid resource=${MGEMS_URL}`);
 
 /**
  * The resource link to where MQTT server of the MGEMS is hosted.
@@ -168,7 +165,7 @@ fs.createReadStream(MOCK_CSV_PROFILE_PATH)
   });
 
 let c_itr = 0;
-let batteryEnergy = STORAGE_SYSTEM_CAPACITY * 0.5; // in kWH
+let batteryEnergy = STORAGE_SYSTEM_CAPACITY * 0.5; // in kWh
 
 function updateState(state_key, state_value) {
   client.publish(`prosumers/${VP_ADDRESS}/${state_key}`, `${state_value}`);
