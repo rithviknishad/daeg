@@ -164,8 +164,11 @@ function prosumerSetup() {
       is_trader: true,
     })
     .then((response) => {
-      log.log(response.data);
-      log.log(response.status);
+      log.success("Prosumer registered.");
+    })
+    .catch((error) => {
+      log.error(`${error}. Prosumer not registered.`);
+      gracefullyExit();
     });
 }
 
