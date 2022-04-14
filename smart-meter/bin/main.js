@@ -5,6 +5,8 @@ const mqtt = require("mqtt");
 const log = require("./logger");
 const fs = require("fs");
 const Papa = require("papaparse");
+const { stringify } = require("querystring");
+const axios = require("axios").default;
 
 /**
  * Vaidyuti Protocol Address assigned to the prosumer.
@@ -23,13 +25,23 @@ log.trace(`Prosumer location=(${LATITUDE}, ${LONGITUDE})`);
  * Prosumer's PV system installed capacity in KW.
  */
 const PV_SYSTEM_CAPACITY = process.env.PV_SYSTEM_CAPACITY || 5;
-log.trace(`Prosumer PV system installed capacity=${PV_SYSTEM_CAPACITY} KW`);
+log.trace(`Prosumer PV system installed capacity=${PV_SYSTEM_CAPACITY} kW`);
 
 /**
  * Prosumer's Energy system installed capacity in KWH.
  */
 const STORAGE_SYSTEM_CAPACITY = process.env.STORAGE_SYSTEM_CAPACITY || 5;
-log.trace(`Prosumer storage system capacity=${STORAGE_SYSTEM_CAPACITY} KWH`);
+log.trace(`Prosumer storage system capacity=${STORAGE_SYSTEM_CAPACITY} kWh`);
+
+/**
+ * The nominal, on-peak and off-peak selling price limits of the prosumer.
+ */
+const NOMINAL_SELLING_PRICE = process.env.NOMINAL_SELLING_PRICE || 5;
+const ON_PEAK_SELLING_PRICE = process.env.ON_PEAK_SELLING_PRICE || 10;
+const OFF_PEAK_SELLING_PRICE = process.env.OFF_PEAK_SELLING_PRICE || 3;
+log.trace(
+  `Prosumer selling price={${OFF_PEAK_SELLING_PRICE}, ${NOMINAL_SELLING_PRICE}, ${ON_PEAK_SELLING_PRICE}}`
+);
 
 /**
  * Solcast API Key for solar forecasting.
@@ -44,7 +56,7 @@ if (!SOLCAST_API_KEY) {
  * Defaults to 1x.
  * Eg: `SIMULATION_SPEED=2` means the clock shall run two times faster than
  * real-world clock.
- * Note: this will affect the `UPDATE_INTERVAL`s effective value.
+ * Note: this will affect the `CONTRACT_INTERVAL`s effective value.
  */
 const SIMULATION_SPEED = process.env.SIMULATION_SPEED || 1;
 log.trace(`Simulation speed set to: ${SIMULATION_SPEED}x`);
@@ -55,11 +67,11 @@ log.trace(`Simulation speed set to: ${SIMULATION_SPEED}x`);
  * 15 minutes.
  * Value should be in milliseconds.
  */
-const UPDATE_INTERVAL =
-  (process.env.UPDATE_INTERVAL || 900000) / SIMULATION_SPEED;
+const CONTRACT_INTERVAL =
+  (process.env.CONTRACT_INTERVAL || 900000) / SIMULATION_SPEED;
 log.trace(
   `Contracts will be exchanged every ${
-    UPDATE_INTERVAL / 1000
+    CONTRACT_INTERVAL / 1000
   } seconds (real world clock).`
 );
 
@@ -68,11 +80,19 @@ log.trace(
  */
 const MOCK_CSV_PROFILE_PATH =
   process.env.MOCK_CSV_PROFILE_PATH || "profile.csv";
+log.trace(`Using mock profile from=${MOCK_CSV_PROFILE_PATH}`);
+
+/**
+ * The resource link to the associated MGEMS server of the prosumer.
+ */
+const MGEMS_BASE_URL =
+  process.env.MGEMS_BASE_URL || "http://dev.vaidyuti.io:8000/api";
+log.trace(`Local micro-grid resource=${MGEMS_BASE_URL}`);
 
 /**
  * The resource link to where MQTT server of the MGEMS is hosted.
  */
-const MGEMS_MQTT_URL = process.env.MGEMS_MQTT_URL || "mqtt://127.0.0.1";
+const MGEMS_MQTT_URL = process.env.MGEMS_MQTT_URL || `mqtt://dev.vaidyuti.io`;
 
 /**
  * the initial selling price
@@ -81,7 +101,7 @@ const SELLING_PRICE = process.env.SELLING_PRICE;
 /**
  * The MQTT Client ID of the prosumer.
  */
-const MQTT_CLIENT_ID = `prosumer-${VP_ADDRESS}`;
+const MQTT_CLIENT_ID = `prosumer-${VP_ADDRESS.replace(":", "_")}`;
 
 /**
  * The MQTT username of the prosumer.
@@ -131,42 +151,57 @@ function gracefullyExit() {
 process.on("SIGINT", gracefullyExit);
 process.on("SIGTERM", gracefullyExit);
 
-function solar_operations(client, address, index) {
-  let solar_forecast = pv_estimates[index];
-  client.publish(`prosumers/${VP_ADDRESS}/generation/0`, solar_forecast);
-}
+const mgemsServer = axios.create({
+  baseURL: MGEMS_BASE_URL,
+  timeout: 1000,
+});
 
 function prosumerSetup() {
-  // TODO: register prosumer to MGEMS server using HTTP POST
-  // TODO: gracefully terminate with exit code 1, if response != OK
+  log.log("Registering prosumer");
+  mgemsServer
+    .post(`/prosumers/`, {
+      id: VP_ADDRESS,
+      max_import_power: 2.1,
+      max_export_power: 2.1,
+      is_online: true,
+      is_dr_adaptive: true,
+      is_trader: true,
+    })
+    .then((response) => {
+      log.success("Prosumer registered.");
+    })
+    .catch((error) => {
+      log.error(`${error}. Prosumer not registered.`);
+      gracefullyExit();
+    });
 }
 
 /**
  * The Generation , Consumption , Storage and Import uniits of each prosumer.
  */
-const csv = [];
+const profile = [];
 
 fs.createReadStream(MOCK_CSV_PROFILE_PATH)
   .pipe(Papa.parse(Papa.NODE_STREAM_INPUT, { header: true }))
   .on("data", (data) => {
-    csv.push(data);
+    profile.push(data);
   })
   .on("end", () => {
-    setInterval(prosumerLoop, UPDATE_INTERVAL);
+    setInterval(prosumerLoop, CONTRACT_INTERVAL);
   });
 
-let c_itr = 0;
-let batteryEnergy = STORAGE_SYSTEM_CAPACITY * 0.5; // in kWH
+let cItr = 0;
+let batteryEnergy = STORAGE_SYSTEM_CAPACITY * 0.5; // in kWh
 
 function updateState(state_key, state_value) {
   client.publish(`prosumers/${VP_ADDRESS}/${state_key}`, `${state_value}`);
 }
 
 function prosumerLoop() {
-  c_itr = c_itr % (csv.length - 1);
-  c_itr = c_itr + 1;
+  cItr = cItr % (profile.length - 1);
+  cItr = cItr + 1;
 
-  let net_charge_rate = csv[c_itr].generation - csv[c_itr].consumption;
+  let net_charge_rate = profile[cItr].generation - profile[cItr].consumption;
   let net_import = 0;
 
   if (
@@ -178,17 +213,10 @@ function prosumerLoop() {
     net_import = -net_charge_rate;
   }
 
-  if (total_gens > total_cons) {
-    SELLING_PRICE = SELLING_PRICE * 0.5;
-  } else if (total_cons > total_gens) {
-    SELLING_PRICE = SELLING_PRICE * 2;
-  } else SELLING_PRICE = SELLING_PRICE * 1;
-
-  updateState("generation", csv[c_itr].generation);
-  updateState("consumption", csv[c_itr].consumption);
+  updateState("generation", profile[cItr].generation);
+  updateState("consumption", profile[cItr].consumption);
   updateState("storage", batteryEnergy);
   updateState("import", net_import);
-  updateState("Selling_Price" , SELLING_PRICE);
 }
 
 prosumerSetup();
