@@ -5,6 +5,7 @@ const mqtt = require("mqtt");
 const log = require("./logger");
 const fs = require("fs");
 const Papa = require("papaparse");
+const axios = require("axios").default;
 
 /**
  * Vaidyuti Protocol Address assigned to the prosumer.
@@ -44,7 +45,7 @@ if (!SOLCAST_API_KEY) {
  * Defaults to 1x.
  * Eg: `SIMULATION_SPEED=2` means the clock shall run two times faster than
  * real-world clock.
- * Note: this will affect the `UPDATE_INTERVAL`s effective value.
+ * Note: this will affect the `CONTRACT_INTERVAL`s effective value.
  */
 const SIMULATION_SPEED = process.env.SIMULATION_SPEED || 1;
 log.trace(`Simulation speed set to: ${SIMULATION_SPEED}x`);
@@ -55,11 +56,11 @@ log.trace(`Simulation speed set to: ${SIMULATION_SPEED}x`);
  * 15 minutes.
  * Value should be in milliseconds.
  */
-const UPDATE_INTERVAL =
-  (process.env.UPDATE_INTERVAL || 900000) / SIMULATION_SPEED;
+const CONTRACT_INTERVAL =
+  (process.env.CONTRACT_INTERVAL || 900000) / SIMULATION_SPEED;
 log.trace(
   `Contracts will be exchanged every ${
-    UPDATE_INTERVAL / 1000
+    CONTRACT_INTERVAL / 1000
   } seconds (real world clock).`
 );
 
@@ -70,9 +71,14 @@ const MOCK_CSV_PROFILE_PATH =
   process.env.MOCK_CSV_PROFILE_PATH || "profile.csv";
 
 /**
+ * The resource link to the associated MGEMS server of the prosumer.
+ */
+const MGEMS_URL = process.env.MGEMS_URL || "dev.vaidyuti.io";
+
+/**
  * The resource link to where MQTT server of the MGEMS is hosted.
  */
-const MGEMS_MQTT_URL = process.env.MGEMS_MQTT_URL || "mqtt://127.0.0.1";
+const MGEMS_MQTT_URL = process.env.MGEMS_MQTT_URL || `mqtt://${MGEMS_URL}`;
 
 /**
  * the initial selling price
@@ -147,7 +153,7 @@ fs.createReadStream(MOCK_CSV_PROFILE_PATH)
     profile.push(data);
   })
   .on("end", () => {
-    setInterval(prosumerLoop, UPDATE_INTERVAL);
+    setInterval(prosumerLoop, CONTRACT_INTERVAL);
   });
 
 let c_itr = 0;
