@@ -13,6 +13,8 @@ const axios = require("axios").default;
  */
 const VP_ADDRESS = process.env.VP_ADDRESS || "no-vp-addr";
 log.trace(`Starting prosumer with VP_ADDRESS=${VP_ADDRESS}`);
+const PARENT_VP_ADDRESS = VP_ADDRESS.split(":").slice(0, -1).join(":");
+log.trace(`PARENT_VP_ADDRESS=${PARENT_VP_ADDRESS}`);
 
 /**
  * Prosumer's geographic location attributes: latitude, longitude.
@@ -126,9 +128,22 @@ const client = mqtt.connect(MGEMS_MQTT_URL, {
   clean: false,
 });
 
+let grid_generation = 0;
+let grid_consumption = 0;
+
 client
   .on("connect", () => {
     log.success(`${chalk.yellowBright("⚡")} Connected to ${MGEMS_MQTT_URL}`);
+    client.subscribe(`prosumers/${PARENT_VP_ADDRESS}/generation`);
+    client.subscribe(`prosumers/${PARENT_VP_ADDRESS}/consumption`);
+  })
+  .on("message", (topic, payload, packet) => {
+    if (topic.includes("generation")) {
+      grid_generation = parseFloat(payload);
+    }
+    if (topic.includes("consumption")) {
+      grid_consumption = parseFloat(payload);
+    }
   })
   .on("disconnect", () => {
     log.error("MQTT client disconnected.");
@@ -172,7 +187,7 @@ function prosumerSetup() {
     })
     .catch((error) => {
       log.error(`${error}. Prosumer not registered.`);
-      gracefullyExit();
+      // gracefullyExit();
     });
 }
 
@@ -213,10 +228,19 @@ function prosumerLoop() {
     net_import = -net_charge_rate;
   }
 
+  let pu_consumption = grid_consumption / grid_generation;
+  if (pu_consumption > 1.01) {
+    selling_price = ON_PEAK_SELLING_PRICE;
+  } else if (pu_consumption < 0.99) {
+    selling_price = OFF_PEAK_SELLING_PRICE;
+  } else {
+    selling_price = NOMINAL_SELLING_PRICE;
+  }
   updateState("generation", profile[cItr].generation);
   updateState("consumption", profile[cItr].consumption);
   updateState("storage", batteryEnergy);
   updateState("import", net_import);
+  updateState("selling_price", selling_price);
 }
 
 prosumerSetup();
