@@ -8,6 +8,7 @@ from django_filters.rest_framework import (
     NumberFilter,
 )
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from mgems.mixins import AllowPUTAsCreateMixin
 
 from mgems.models import Prosumer
 from mgems.serializers import ProsumerSerialzier
@@ -19,7 +20,7 @@ class ProsumerFilter(FilterSet):
     id = CharFilter(lookup_expr="icontains")
 
 
-class ProsumerViewSet(ModelViewSet):
+class ProsumerViewSet(ModelViewSet, AllowPUTAsCreateMixin):
     """Model View Set for Prosumer"""
 
     queryset = Prosumer.objects.all()

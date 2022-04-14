@@ -5,6 +5,7 @@ const mqtt = require("mqtt");
 const log = require("./logger");
 const fs = require("fs");
 const Papa = require("papaparse");
+const { stringify } = require("querystring");
 const axios = require("axios").default;
 
 /**
@@ -84,18 +85,19 @@ log.trace(`Using mock profile from=${MOCK_CSV_PROFILE_PATH}`);
 /**
  * The resource link to the associated MGEMS server of the prosumer.
  */
-const MGEMS_URL = process.env.MGEMS_URL || "dev.vaidyuti.io";
-log.trace(`Local micro-grid resource=${MGEMS_URL}`);
+const MGEMS_BASE_URL =
+  process.env.MGEMS_BASE_URL || "http://dev.vaidyuti.io:8000/api";
+log.trace(`Local micro-grid resource=${MGEMS_BASE_URL}`);
 
 /**
  * The resource link to where MQTT server of the MGEMS is hosted.
  */
-const MGEMS_MQTT_URL = process.env.MGEMS_MQTT_URL || `mqtt://${MGEMS_URL}`;
+const MGEMS_MQTT_URL = process.env.MGEMS_MQTT_URL || `mqtt://dev.vaidyuti.io`;
 
 /**
  * The MQTT Client ID of the prosumer.
  */
-const MQTT_CLIENT_ID = `prosumer-${VP_ADDRESS}`;
+const MQTT_CLIENT_ID = `prosumer-${VP_ADDRESS.replace(":", "_")}`;
 
 /**
  * The MQTT username of the prosumer.
@@ -145,9 +147,26 @@ function gracefullyExit() {
 process.on("SIGINT", gracefullyExit);
 process.on("SIGTERM", gracefullyExit);
 
+const mgemsServer = axios.create({
+  baseURL: MGEMS_BASE_URL,
+  timeout: 1000,
+});
+
 function prosumerSetup() {
-  // TODO: register prosumer to MGEMS server using HTTP POST
-  // TODO: gracefully terminate with exit code 1, if response != OK
+  log.log("Registering prosumer");
+  mgemsServer
+    .post(`/prosumers/`, {
+      id: VP_ADDRESS,
+      max_import_power: 2.1,
+      max_export_power: 2.1,
+      is_online: true,
+      is_dr_adaptive: true,
+      is_trader: true,
+    })
+    .then((response) => {
+      log.log(response.data);
+      log.log(response.status);
+    });
 }
 
 /**
@@ -164,7 +183,7 @@ fs.createReadStream(MOCK_CSV_PROFILE_PATH)
     setInterval(prosumerLoop, CONTRACT_INTERVAL);
   });
 
-let c_itr = 0;
+let cItr = 0;
 let batteryEnergy = STORAGE_SYSTEM_CAPACITY * 0.5; // in kWh
 
 function updateState(state_key, state_value) {
@@ -172,15 +191,15 @@ function updateState(state_key, state_value) {
 }
 
 function prosumerLoop() {
-  c_itr = c_itr % (profile.length - 1);
-  c_itr = c_itr + 1;
+  cItr = cItr % (profile.length - 1);
+  cItr = cItr + 1;
 
-  let net_charge_rate = profile[c_itr].generation - profile[c_itr].consumption;
+  let net_charge_rate = profile[cItr].generation - profile[cItr].consumption;
   let net_import = 0;
   let total_gen = 0;
   let total_cons = 0;
-  total_gen = total_gen + profile[c_itr].generation;
-  total_cons = total_cons + profile[c_itr].consumption;
+  total_gen = total_gen + profile[cItr].generation;
+  total_cons = total_cons + profile[cItr].consumption;
 
   if (
     batteryEnergy + net_charge_rate > 0 &&
@@ -191,8 +210,8 @@ function prosumerLoop() {
     net_import = -net_charge_rate;
   }
 
-  updateState("generation", profile[c_itr].generation);
-  updateState("consumption", profile[c_itr].consumption);
+  updateState("generation", profile[cItr].generation);
+  updateState("consumption", profile[cItr].consumption);
   updateState("storage", batteryEnergy);
   updateState("import", net_import);
 }
