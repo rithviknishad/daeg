@@ -212,6 +212,13 @@ function updateState(state_key, state_value) {
   client.publish(`prosumers/${VP_ADDRESS}/${state_key}`, `${state_value}`);
 }
 
+function computeExportPrice() {
+  let puConsumption = grid_consumption / grid_generation;
+  if (puConsumption >= 1.01) return ON_PEAK_SELLING_PRICE;
+  if (puConsumption <= 0.99) return OFF_PEAK_SELLING_PRICE;
+  return NOMINAL_SELLING_PRICE;
+}
+
 function prosumerLoop() {
   cItr = cItr % (profile.length - 1);
   cItr = cItr + 1;
@@ -228,19 +235,14 @@ function prosumerLoop() {
     net_import = -net_charge_rate;
   }
 
-  let pu_consumption = grid_consumption / grid_generation;
-  if (pu_consumption > 1.01) {
-    selling_price = ON_PEAK_SELLING_PRICE;
-  } else if (pu_consumption < 0.99) {
-    selling_price = OFF_PEAK_SELLING_PRICE;
-  } else {
-    selling_price = NOMINAL_SELLING_PRICE;
-  }
   updateState("generation", profile[cItr].generation);
   updateState("consumption", profile[cItr].consumption);
   updateState("storage", batteryEnergy);
   updateState("import", net_import);
-  updateState("selling_price", selling_price);
+  updateState("export_price", computeExportPrice());
+
+  // TODO: whether this prosumer can export energy at present
+  // updateState("can_export", true or false);
 }
 
 prosumerSetup();
