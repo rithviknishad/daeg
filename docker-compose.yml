@@ -8,7 +8,6 @@ networks:
     name: vaidyuti-internal
 
 services:
-  # VerneMQ MQTT Server
   emqx:
     image: emqx/emqx:4.4.2
     restart: always
@@ -29,7 +28,6 @@ services:
     ports:
       - 8086:8086
     volumes:
-      # Mount for influxdb data directory and configuration
       - ./data/influx-v2:/var/lib/influxdb2:rw
     networks:
       - internal
@@ -63,37 +61,3 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_DB=${POSTGRES_DB}
-
-
-  grafana:
-    image: grafana/grafana
-    restart: always
-    ports:
-      - 3000:3000
-    volumes:
-      - ./data/grafana:/var/lib/grafana
-    environment:
-      GF_SERVER_PROTOCOL: "http"
-      GF_SERVER_DOMAIN: ${HOSTNAME}
-      GF_SERVER_METRICS_ENABLED: "true"
-      GF_SERVER_METRICS_INTERVAL_SECONDS: "10"
-    networks:
-      - internal
-      - public
-
-  # mgems-api-server:
-  #   build: ./mgems_api_server
-  #   command: python manage.py runserver 0.0.0.0:8000
-  #   # volumes:
-  #   #   - ./mgems_api_server:/code
-  #   ports:
-  #     - "8000:8000"
-  #   environment:
-  #     - POSTGRES_NAME=${POSTGRES_DB}
-  #     - POSTGRES_USER=${POSTGRES_USER}
-  #     - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-  #     - DJANGO_SETTINGS_MODULE=mgems_api_server.settings.dev
-  #   depends_on:
-  #     - vernemq
-  #     - influxdb
-  #     - postgres
