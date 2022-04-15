@@ -1,2 +1,2 @@
-#!bash
+#!/usr/bin/env bash
 dart bin/main.dart "$@"
