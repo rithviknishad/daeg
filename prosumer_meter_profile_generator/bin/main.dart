@@ -2,8 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
+import 'package:csv/csv.dart';
 
-import 'utils/solar_estimate.dart';
 import 'utils/solcast_query_params.dart';
 
 void main(List<String> arguments) {
@@ -12,14 +12,9 @@ void main(List<String> arguments) {
     "Batch energy consumption and generation profile management tool for Smart Meter.",
   );
 
-  runner.addCommand(CacheCommand());
-  runner.addCommand(MakeCommand());
-
-  final solcastApiKey = Platform.environment["SOLCAST_API_KEY"];
-  if (solcastApiKey == null) {
-    stderr.writeln("Missing SOLCAST_API_KEY in environment. Shall terminate.");
-    exit(1);
-  }
+  runner
+    ..addCommand(CacheCommand())
+    ..addCommand(MakeCommand());
 
   runner.run(arguments).catchError((error) {
     if (error is! UsageException) throw error;
@@ -43,32 +38,81 @@ class CacheCommand extends Command {
         valueHelp: "SOLCAST_API_KEY",
         defaultsTo: Platform.environment["SOLCAST_API_KEY"],
       )
-      ..addOption("latitude", mandatory: true)
-      ..addOption("longitude", mandatory: true)
       ..addOption(
-        "capacity",
-        help: "Installed capacity of PV system in KW",
+        "latitude",
+        mandatory: true,
+      )
+      ..addOption(
+        "longitude",
+        mandatory: true,
+      )
+      ..addOption(
+        "output-prefix",
+        defaultsTo: "",
+      )
+      ..addMultiOption(
+        "capacities",
+        help: "Installed capacities of PV systems in KW",
         valueHelp: "in kw",
-        defaultsTo: "1",
+        defaultsTo: ["1", "2", "3", "5", "10", "20", "40", "50", "75", "100"],
       );
   }
 
   @override
   Future<void> run() async {
-    stdout.writeln("Caching solar...");
-  }
+    final argResults = this.argResults;
+    if (argResults == null) return;
 
-  Future<void> fetchSolarEstimates(SolcastApiQuery solcastApiQuery) async {
-    final response = await solcastApiQuery.response;
-    final data = jsonDecode(response.body);
-    final records = data['estimated_actuals'];
-    for (final record in records) {
-      print(SolarEstimate.fromJson(record));
+    final String latitude = argResults["latitude"];
+    final String longitude = argResults["longitude"];
+    final String outputPrefix = argResults["output-prefix"];
+    final List capacities = argResults["capacities"];
+
+    stdout.write("Hitting Solcast API Servers...");
+    final pvEstimates = await fetchSolarEstimates(
+      SolcastApiQuery(
+        latitude: argResults["latitude"],
+        longitude: argResults["longitude"],
+        solarPvCapacity: "1",
+        apiKey: argResults["api-key"],
+      ),
+    );
+    stdout.writeln("  OK");
+
+    int i = 0, totalProfiles = capacities.length;
+
+    for (final _capacity in capacities) {
+      ++i;
+      final capacity = double.parse(_capacity);
+      final csv = ListToCsvConverter().convert([
+        ["datetime", "pv_estimate"],
+        ...pvEstimates.entries.map((e) => ['${e.key}', e.value * capacity]),
+      ]);
+
+      final file = File(
+          "pool/generation/$outputPrefix ${DateTime.now()} lat=$latitude long=$longitude cap=$capacity.csv");
+
+      await file.writeAsString(csv, mode: FileMode.write);
+
+      stdout.writeln("[$i/$totalProfiles]  Wrote file: ${file.path}");
     }
   }
 
-  double lerpDouble(num a, num b, double t) {
-    return a + (b - a) * t;
+  Future<Map<DateTime, double>> fetchSolarEstimates(
+      SolcastApiQuery solcastApiQuery) async {
+    final Map<DateTime, double> pvEstimates = {};
+
+    final response = await solcastApiQuery.response;
+    final data = jsonDecode(response.body);
+
+    for (final record in data['estimated_actuals']) {
+      final periodEnd = DateTime.parse(record["period_end"]);
+      final pvEstimate = record["pv_estimate"].toDouble();
+
+      pvEstimates[periodEnd] = pvEstimate;
+    }
+
+    return pvEstimates;
   }
 }
 
@@ -89,7 +133,7 @@ class MakeCommand extends Command {
       ..addOption(
         "parent-prosumer-id",
         valueHelp: "prosumer-id",
-        defaultsTo: "ff:ff:ff:ff:ff:ff",
+        defaultsTo: "2001:0db8:85a3:0000:0000:8a2e:0370",
       )
       ..addOption(
         "load-profiles",
@@ -102,7 +146,7 @@ class MakeCommand extends Command {
       ..addOption(
         "output-prefix",
         abbr: 'o',
-        defaultsTo: "makes",
+        defaultsTo: "profile",
       )
       ..addOption(
         "interval",

@@ -13,7 +13,7 @@ class SolarEstimate {
     return SolarEstimate(
       periodEnd: DateTime.parse(json["period_end"]).toLocal(),
       period: 30 * 60, // TODO: extract from "period" string.
-      pvEstimate: json["pv_estimate"].toDouble(),
+      pvEstimate: double.parse(json["pv_estimate"]),
     );
   }
 
