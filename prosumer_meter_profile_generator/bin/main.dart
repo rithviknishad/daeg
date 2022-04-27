@@ -126,9 +126,10 @@ class MakeCommand extends Command {
   MakeCommand() {
     argParser
       ..addOption(
-        "profiles",
-        valueHelp: "int",
-        help: "The number of profiles to be generated",
+        "penetration-level",
+        valueHelp: "double [0:1]",
+        defaultsTo: "0.5",
+        help: "The penetration level of the prosumers in the environment.",
       )
       ..addOption(
         "parent-prosumer-id",
@@ -136,7 +137,7 @@ class MakeCommand extends Command {
         defaultsTo: "2001:0db8:85a3:0000:0000:8a2e:0370",
       )
       ..addOption(
-        "load-profiles",
+        "consumption-profiles",
         defaultsTo: "pool/consumption",
       )
       ..addOption(
@@ -155,5 +156,36 @@ class MakeCommand extends Command {
         help: "Time delta of data points in seconds",
       )
       ..addFlag("output-suffix-datetime", defaultsTo: true);
+  }
+
+  Future<void> run() async {
+    final argResults = this.argResults;
+    if (argResults == null) return;
+
+    final double penetrationLevel =
+        double.parse(argResults["penetration-level"]);
+    final String parentProsumerId = argResults["parent-prosumer-id"];
+    final consumptionsDirectory = Directory(argResults["consumption-profiles"]);
+    final generationsDirectory = Directory(argResults["generation-profiles"]);
+    final String outputPrefix = argResults["output-prefix"];
+    final int profileInterval = int.parse(argResults["interval"]);
+    final bool shouldSuffixDateTimeInOutput =
+        argResults["output-suffix-datetime"];
+
+    final consumptionProfileFiles =
+        (await consumptionsDirectory.list().toList())
+            .whereType<File>()
+            .where((file) => file.path.contains('.csv'));
+
+    final generationProfileFiles = (await generationsDirectory.list().toList())
+        .whereType<File>()
+        .where((file) => file.path.contains('.csv'));
+
+    stdout.writeln("p: $penetrationLevel");
+    stdout.writeln("g profiles: ${generationProfileFiles.length}");
+    stdout.writeln("c profiles: ${consumptionProfileFiles.length}");
+    stdout.writeln(
+      "nc = ${(generationProfileFiles.length / penetrationLevel).ceil()}",
+    );
   }
 }
